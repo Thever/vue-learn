@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <!--数组遍历-->
+    <ul id="vm1">
+        <li v-for="item in items">
+            {{item.word}}
+        </li>
+    </ul>
+    <script>
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                items:[
+                    {word:'jojo'},
+                    {word:'ko no dio da!'}
+                ]
+            }
+        })
+    </script>
+    <!--数组+序号+公共内容遍历-->
+    <ul id="vm2">
+        <li v-for="(what,index) in words">
+            序号{{index}}:{{what.said}}{{allused}}
+        </li>
+    </ul>
+    <script>
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                allused:'这个是公共内容哒！',
+                words:[
+                    {said:'哟~'},
+                    {said:'vue的v-for循环挺好用！'}
+                ]
+            }
+        })
+    </script>
+    <!--对象遍历-->
+    <ul id="vm3">
+        <!--v-for in循环对象的参数顺序为val,key,index排序,你也可以用其他遍历代替，不会对变量名称识别，固定死的-->
+        <!--注意和原生js的in循环区分-->
+        <!--多次循环输出增加key来标识-->
+        <li v-for="(val,key,index) in myObject" key="kind1">
+            {{index}},{{key}}:{{val}},{{allused}}
+        </li>
+        <span>----------------------------------------------</span>
+        <li v-for="(val,key,index) in myObject" key="kind2">
+            {{index}},{{key}}:{{val}},{{allused}}
+        </li>
+    </ul>
+    <script>
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                allused:'这里写一些通用话',
+                myObject:{
+                    name:'dio',
+                    age:200,
+                    word:'ko no dio da!'
+                }
+            }
+        })
+    </script>
+    <!--尝试vue循环数组里的对象-->
+    <ul id="vm4">
+        <li v-for="item in myArray ">
+            <!--正常情况下规定输出-->
+            {{item.name}}+{{item.age}}+{{item.word}}
+            <!--v-for不能嵌套使用-->
+            <!--<span v-for="(val,key,index) in item"></span>-->
+        </li>
+    </ul>
+    <script>
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                myArray:[
+                    {
+                        name:'jojo',
+                        age:16,
+                        word:'呀咧呀咧'
+                    },
+                    {
+                        name:'dio',
+                        age:200,
+                        word:'ko no dio da!'
+                    }
+                ]
+            }
+        })
+    </script>
+    <br>
+    <!--对数组对象进行操作-->
+    <ul id="vm5">
+        <li v-for="item in number">
+            {{item}}
+        </li>
+    </ul>
+    <script>
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                number:['a','b','c','d']
+            }
+        })
+        //替换某个数组值
+        Vue.set(vm5.number,1,'B')
+        vm5.$set(vm5.number, 0, 'A')
+
+        //截取数前2位
+        vm5.number.splice(2)
+    </script>
+    <!--对对象进行操作-->
+    <ul id="vm6">
+        <li v-for="(val,key,index) in myObject">
+            {{index+1}},{{key}}:{{val}}
+        </li>
+    </ul>
+    <script>
+        var vm6 = new Vue({
+            el:'#vm6',
+            data:{
+                myObject:{
+                    name:'dio',
+                    age:200
+                }
+            }
+        })
+
+        //单独添加对象属性
+        Vue.set(vm6.myObject,'word','ko no dio da!')
+        vm6.$set(vm6.myObject,'come','老不死的，你的替身最没用啦！')
+
+        //单次添加多个对象属性
+        vm6.myObject=Object.assign({},vm6.myObject,{
+            day:10,
+            weather:'sunny'
+        })
+    </script>
+    <!--显示过滤与排序-->
+    <ul id="vm7">
+        <!--数组v-for循环的顺序是本身的值+排序，val+index-->
+        <li v-for="(item,index) in myArray">
+            index{{index+1}}:{{item}}
+        </li>
+    </ul>
+    <script>
+        var vm7 = new Vue({
+            el:'#vm7',
+            data:{
+                beforeArray:[1,2,3,4,5,6,7]
+            },
+            computed:{
+                myArray(){
+                    console.log('运行了computed的方法')
+                    return this.beforeArray.filter(function(num){
+                        return num % 2 ===0
+                    })
+                }
+            }
+        })
+    </script>
+    <!--用methods方法来写，调用注意函数调用-->
+    <ul id="vm8">
+        <li v-for="(item,index) in myArray()">
+            index{{index+1}}:{{item}}
+        </li>
+    </ul>
+    <script>
+        var vm8 = new Vue({
+            el:'#vm8',
+            data:{
+                beforeArray:[11,12,13,14,15,16,17]
+            },
+            methods:{
+                myArray(){
+                    console.log('运行了methods的方法')
+                    return this.beforeArray.filter(function(num){
+                        return num % 2 ===0
+                    })
+                }
+            }
+        })
+    </script>
+    <!--v-for取范围段-->
+    <ul id="vm9">
+        <li v-for="(val,index) in 10">
+            {{index+1}}:{{val}}
+        </li>
+    </ul>
+    <script>
+        var vm9 = new Vue({
+            el:'#vm9'
+            // 取范围段用不到data提供对象
+        })
+    </script>
+    <!--v-for在template中使用-->
+    <ul id="vm10">
+        <template v-for="item in words">
+            <li>{{item.msg}}</li>
+            <p>这是循环的一些内容</p>
+        </template>
+    </ul>
+    <script>
+        var vm10 = new Vue({
+            el:'#vm10',
+            data:{
+                words:[
+                    {msg:'jojo'},
+                    {msg:'ko no dio da!'}
+                ]
+            }
+        })
+    </script>
+    <!--v-for和v-if一同使用-->
+    <br><br><br><br><br><br>
+    <h3>这里开始v-for和v-if的混合使用</h3>
+    <div id="vm11">
+        <ul>
+            <li v-for="item in words" v-if="item.isSHow===true">
+                {{item.msg}}
+            </li>
+        </ul>
+    </div>
+    <script>
+        var vm11 = new Vue({
+            el:'#vm11',
+            data:{
+                words:[
+                    {msg:'jojo',isSHow:false},
+                    {msg:'ko no dio da!',isSHow:true}
+                ],
+                isShow:true
+            }
+        })
+        //如果不想显示模块的话，vm11.isShow=false
+    </script>
+    <br><br><br><br>
+    <!--模板使用v-for-->
+    <div id="todo-list-example">
+        <form v-on:submit.prevent="addNewTodo">
+            <label for="new-todo">Add a todo</label>
+            <input
+                    v-model="newTodoText"
+                    id="new-todo"
+                    placeholder="E.g. Feed the cat"
+            >
+            <button>Add</button>
+        </form>
+        <ul>
+            <li
+                    is="todo-item"
+                    v-for="(todo, index) in todos"
+                    v-bind:key="todo.id"
+                    v-bind:title="todo.title"
+                    v-on:remove="todos.splice(index, 1)"
+            ></li>
+        </ul>
+    </div>
+    <script>
+        Vue.component('todo-item', {
+            template: '\
+    <li>\
+      {{ title }}\
+      <button v-on:click="$emit(\'remove\')">Remove</button>\
+    </li>\
+  ',
+            props: ['title']
+        })
+
+        new Vue({
+            el: '#todo-list-example',
+            data: {
+                newTodoText: '',
+                todos: [
+                    {
+                        id: 1,
+                        title: 'Do the dishes',
+                    },
+                    {
+                        id: 2,
+                        title: 'Take out the trash',
+                    },
+                    {
+                        id: 3,
+                        title: 'Mow the lawn'
+                    }
+                ],
+                nextTodoId: 4
+            },
+            methods: {
+                addNewTodo: function () {
+                    this.todos.push({
+                        id: this.nextTodoId++,
+                        title: this.newTodoText
+                    })
+                    this.newTodoText = ''
+                }
+            }
+        })
+    </script>
+</body>
+</html>

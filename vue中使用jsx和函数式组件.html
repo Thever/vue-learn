@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <p>使用jsx需要运行环境。</p>
+    <div id="vm1">
+        <my-functional-button>contextchildren用于接受传入的参数</my-functional-button>
+    </div>
+    <script>
+        Vue.component('my-functional-button', {
+            functional: true,
+            render: function (createElement, context) {
+                // 完全透传任何特性、事件监听器、子节点等。
+                return createElement('button', context.data, context.children)
+            }
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <!--纯if输出-->
+    <div id="vm1">
+        <p v-if="isShow">这个是直接用v-if输出哒！</p>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                isShow:true
+            }
+        })
+    </script>
+    <!--if和else的混用-->
+    <div id="vm2">
+        <p v-if="isShow">为true时显示的内容</p>
+        <p v-else>为false时显示的内容</p>
+    </div>
+    <script>
+        /*你可以用js获取当前屏幕的宽度来用v-if来做兼容性框架啦*/
+        var isfalse=false
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                isShow:isfalse
+            }
+        })
+    </script>
+    <!--if,else if,else的混用-->
+    <div id="vm3">
+        <p v-if="type==='A'||type==='a'">type为A</p>
+        <p v-else-if="type=='B'||type==='b'">type为B</p>
+        <p v-else-if="type=='C'||type==='c'">type为C</p>
+        <p v-else>type不为A,B,C</p>
+    </div>
+    <script>
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                type:'A'
+            }
+        })
+    </script>
+    <!--用不用关键词key来控制模板渲染-->
+    <div id="vm4">
+        <div class="name" v-if="type==='name'">
+            <label>用户名登录：</label>
+            <input placeholder='请输入您的用户名'>
+        </div>
+        <div class="email" v-else-if="type==='email'">
+            <label>邮箱登录</label>
+            <input placeholder="请输入您的邮箱">
+        </div>
+        <div class="other" v-else>
+            <p>当前type值不符合预设</p>
+        </div>
+        <p>{{words}}</p>
+        <br>
+        <button @click="changeType">点我切换内容</button>
+    </div>
+    <script>
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                type:'name'
+            },
+            computed:{
+                words(){
+                    console.log('调用words方法')
+                    return '当前type的内容为：'+this.type
+                }
+            },
+            methods:{
+                changeType(){
+                    console.log('调用methods方法')
+                    this.type==='name'? this.type='email':this.type='name'
+                }
+            }
+        })
+    </script>
+    <!--有坑啊，vue为了追求渲染高效直接把内容复用了没有清除内容-->
+    <!--用key来控制模板渲染-->
+    <div id="vm5">
+        <div class="name" v-if="type==='name'">
+            <label>用户名登录：</label>
+            <input placeholder='请输入您的用户名' key="name-input">
+        </div>
+        <div class="email" v-else-if="type==='email'">
+            <label>邮箱登录</label>
+            <input placeholder="请输入您的邮箱" key="email-input">
+        </div>
+        <div class="other" v-else>
+            <p>当前type值不符合预设</p>
+        </div>
+        <p>{{words}}</p>
+        <br>
+        <button @click="changeType">点我切换内容</button>
+    </div>
+    <script>
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                type:'name'
+            },
+            computed:{
+                words(){
+                    console.log('调用words方法')
+                    return '当前type的内容为：'+this.type
+                }
+            },
+            methods:{
+                changeType(){
+                    console.log('调用methods方法')
+                    this.type==='name'? this.type='email':this.type='name'
+                }
+            }
+        })
+    </script>
+    <!--用v-show来控制样式的显示/隐藏,其实就是为flase添加display:none,为true时不进行操作-->
+    <div id="vm6">
+        <p v-show="isShow">v-show要显示的内容</p>
+    </div>
+    <script>
+        var vm6 =  new Vue({
+            el:'#vm6',
+            data:{
+                isShow:true
+            }
+        })
+    </script>
+    <p>v-if和v-show不要同时使用</p>
+    <p>v-if和v-show不要同时使用</p>
+    <p>v-if和v-show不要同时使用</p>
+    <b>重要的事情说3遍！</b>
+</body>
+</html>

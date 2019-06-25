@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+    <style>
+        .container{
+            border:solid 1px lightseagreen;
+        }
+        header{
+            background-color: lightcoral;
+            padding:5px;
+        }
+        main{
+            background-color: lightskyblue;
+            padding:5px;
+        }
+        footer{
+            background-color: lightgoldenrodyellow;
+            padding:5px;
+        }
+        a{
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+    <!--组件template中可以用slot接受传入的值-->
+    <div id="vm1" :title="'bbb'">
+        <my-link>
+            <p :style="{'color':'red'}">看看这个字会不会变红</p>
+        </my-link>
+        <my-link>
+            <p>slot用来接受组件</p>
+            <used-part :style="{'color':'green'}"></used-part>
+        </my-link>
+        <my-link title="'aaa'">
+            <h3>尝试获取绑定的title值:{{title}}</h3>
+        </my-link>
+        <br>
+        <p>这里你会看到title为ccc,aaa是提供给组件的，bbb是提供给容器vm1,ccc则是在虚拟rom里提供给全局使用的所以才能获取</p>
+        <p>所以属性直接绑定只是修改了目标属性并没有修改整体数据</p>
+    </div>
+    <script>
+        Vue.component('my-link',{
+            template:`
+                <a class="someclass">
+                    <slot></slot>
+                </a>
+            `
+        })
+        Vue.component('used-part',{
+            template:`
+                <p style="color:blue">ko no dio da!</p>
+            `
+        })
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                title:'ccc'
+            }
+        })
+
+        //slot用来接受传入内容并且将其渲染出来
+    </script>
+    <br>
+    <p>slot类似函数名一样可以提供默认信息来方便调用</p>
+    <div id="vm2">
+        <default-part></default-part>
+        <default-part><span style="color:red">这里是传入的新内容哒！</span></default-part>
+    </div>
+    <script>
+        Vue.component('default-part',{
+            template:'<h4 style="color:blue"><slot>这里是组件默认的内容哒！</slot></h4>'
+        })
+        var vm2 = new Vue({
+            el:'#vm2'
+        })
+    </script>
+    <br>
+    <b>内容插槽的目的在于用：name的方式绑定各个slot组件与输入的内容，达到组件的高效使用</b>
+    <div id="vm3">
+        <fixed-part>
+            <!--<div slot="header"></div>-->
+            <!--<h1 slot="header">新的标题</h1>-->
+            <p slot="main">
+                <default-part><span style="color:red">这里是传入的新内容哒！</span></default-part>
+            </p>
+            <a href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=%E5%AE%81%E6%B3%A2%E5%A4%A9%E6%B0%94&oq=%2526lt%253Bmain%2526gt%253B&rsv_pq=ebac4d71000b742d&rsv_t=dadc%2BB9W716BcDyh2pseeQCzpmQjj55EoheN7aRjwfUbclkNkgI9Grlw9Vs&rqlang=cn&rsv_enter=1&inputT=3553&rsv_sug3=49&rsv_sug1=33&rsv_sug7=100&rsv_sug2=0&rsv_sug4=3553" slot="footer">看下宁波天气吧！</a>
+        </fixed-part>
+    </div>
+    <script>
+        Vue.component('fixed-part',{
+            template:`
+                <div class="container">
+                    <header>
+                        <slot name="header">header的默认内容</slot>
+                    </header>
+                    <main>
+                        <slot name="main">main的默认内容</slot>
+                    </main>
+                    <footer>
+                        <slot name="footer">footer的默认内容</slot>
+                    </footer>
+                </div>
+            `
+        })
+        var vm3 = new Vue({
+            el:'#vm3'
+        })
+
+        //内容插槽的用在就是在组件内输入要替换的内容/组件，并且用slot="绑定名称"的方式来声明对目标中内容的替换
+        //slot name不掉用就会用默认设置的内容格式。
+    </script>
+</body>
+</html>

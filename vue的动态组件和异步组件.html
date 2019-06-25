@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <h3>动态组件指的是用keep-alive标签包裹组件来动态调用，异步组件指的是根据异步状态延迟调用组件的情况</h3>
+    <div id="vm1">
+        <p>点击下面按钮来切换组件</p>
+        <!--切换功能-->
+        <button @click="changeComponent('tab1')">tab1</button>
+        <button @click="changeComponent('tab2')">tab2</button>
+        <button @click="changeComponent('async-part')">async-part</button>
+        <!--声明动态组件-->
+        <keep-alive>
+            <component v-bind:is="choseComponent"></component>
+        </keep-alive>
+    </div>
+    <script>
+        //声明一般组件
+        Vue.component('tab1',{
+            data:function(){
+                return {count:0}
+            },
+            methods:{
+                countAdd(){
+                    this.count++
+                }
+            },
+            template:`
+                <div class="tab1">
+                    <p>tab1按钮点击了{{count}}次</p>
+                    <button @click="countAdd">点我增加次数</button>
+                </div>
+            `
+        })
+        Vue.component('tab2',{
+            data:function(){
+                return {count:0}
+            },
+            methods:{
+                countAdd(){
+                    this.count++
+                }
+            },
+            template:`
+                <div class="tab1">
+                    <p>tab2按钮点击了{{count}}次</p>
+                    <button @click="countAdd">点我增加次数</button>
+                </div>
+            `
+        })
+        //明异步组件,后面对象
+        Vue.component('async-part',function(resolve,reject){
+            setTimeout(function(){
+                resolve({
+                    template:`<h3>这个是异步后加载组件</h3>`
+                })
+            },1000)
+        })
+        //实例化调用
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                //指定要激活的组件名
+                choseComponent:'tab1'
+            },
+            methods:{
+                changeComponent(name){
+                    this.choseComponent=name
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <style>
+        a{display:block;color:blue;text-decoration:none;}
+        input{display:block;}
+    </style>
+    <!--直接写方法-->
+    <div id="vm1">
+        <p>按钮已经被调用了{{counter}}次</p>
+        <button @click="counter += 1">点我增加次数</button>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el: '#vm1',
+            data: {
+                counter: 0
+            }
+        })
+    </script>
+    <!--调用方法-->
+    <div id="vm2">
+        <p>按钮已经被调用了{{counter}}次</p>
+        <button @click="click()">点我增加次数</button>
+    </div>
+    <script>
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                counter:1
+            },
+            methods:{
+                click(){
+                    console.log('调用click方法')
+                    this.counter++
+                }
+            }
+        })
+    </script>
+    <!--这里就不写computed了，本质上海市该更改counter，然后搞个没有的映射意义不大-->
+    <br>
+    <!--封装函数传参共用-->
+    <div id="vm3">
+        <button @click="myswal('jojo')">jojo</button>
+        <button @click="myswal('ko no dio da!')">ko no dio da!</button>
+        <button @click.once="myswal('是我Dio哒!')">是我Dio哒!(事件.once只触发一次)</button>
+    </div>
+    <script>
+        var vm3 = new Vue({
+            el:'#vm3',
+            methods:{
+                myswal(val){
+                    alert(val)
+                }
+            }
+        })
+    </script>
+    <h3>事件修饰符用来处理一些特定的状况</h3>
+    <div id="vm4" @click="console.log('vm4被点击了')">
+        <p @click.stop="alert('stop用来阻止事件继续冒泡')">stop用来阻止事件继续冒泡</p>
+        <a href="https://www.baidu.com" @click.prevent="alert('prevent用来阻止默认事件')">prevent用来阻止默认事件</a>
+        <a href="http://www.cnbeta.com" @click.stop.prevent="alert('修改符可以拼接起来一起用')">这个是演示stop.prevent混用的</a>
+        <a href="#" @click.prevent>阻止默认事件，又不绑定事件，当然会有事件冒泡咯</a>
+        <!--capture用来优先触发事件-->
+        <p @click="console.log(1)">
+            <span @click.capture="console.log(2)">
+                <span @click.capture="console.log(3)">
+                    <span @click="console.log(4)">capture用来捕获优先触发事件</span>
+                </span>
+            </span>
+        </p>
+        <!--2 3 4 1 vm4被点击了，也就是说越早出现的capture的优先级越高-->
+        <p @click="alert('self被点击了！')">self用来指向事件本身</p>
+        <div @scroll.passive="showEvent"  style="width:100px;height:100px;display:block；margin:20px;overflow:scroll">
+            <div style="width:100%;height:200px;background:#000;color:#fff;">vue的passive用来监听提升移动端滚动性能</div>
+        </div>
+        <input type="text" @keyup="function(e){console.log('按了'+e.key+'键')}" placeholder="输入内容查看键位" value="输入内容查看键位">
+        <br>
+        <input type="text" @keyup.a.c.stop="console.log('按下了A键或C键')" placeholder="获取焦点按下A,C键" val="获取焦点按下A,C键">
+        <br>
+        click和a的keyup/keydown事件并不会同时出现使用，如果是组合键排除系统特定的功能键以外估计只有快捷键了，实际开发中监听用户输入内容用回车键代替点击发送应该算是一个用户操作的优化吧。
+        <input @click.a.stop="console.log('点击按下a')" placeholder="点击按下a"/>
+        <!--vue混合的混合事件只需要满足1个条件就可以触发了，而且输入键位在IE的支持度不高，现在已经被废弃了，后面的话少用输入键位判断吧-->
+        <br>
+        <input type="text" placeholder="点击鼠标看看" value="鼠标左键点击" @click.left.prevetn="console.log('鼠标左键点击')">
+        <br>
+        <input type="text" placeholder="点击鼠标看看" value="鼠标滚轮点击" @click.middle.prevent="console.log('鼠标滚轮点击')">
+        <br>
+        <input type="text" placeholder="点击鼠标看看" value="鼠标右键点击" @click.right.prevent="console.log('鼠标右键点击')">
+        <br>
+        <button @click.exact.stop="console.log('没有任何修饰符点击触发')">A</button>
+    </div>
+    <script>
+        var vm4 = new Vue({
+            el:'#vm4',
+            methods:{
+                showEvent(e){
+                    console.log(e)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

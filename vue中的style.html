@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vue_style">
+        <!--vue渲染style时会自动加上浏览器前缀-->
+        <p :style="{fontsize:size24,color:colorRed}">jojo,我不做人啦！</p>
+        <p :style="allStyle">木大木大木大木大！</p>
+        <!--多重值看支持度从后往前取内容，套在项目中的话，排序应该是基础模板 中等模板 高级模板的顺序吧，保证功能最高级-->
+        <p :style="{color:['red', 'yellow', 'blue']}">多重值测试</p>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#vue_style',
+            data:{
+                size24:'24px',
+                colorRed:'red',
+                allStyle:{
+                    'color':'blue',
+                    // 对于css中用-拼接的属性必须用''包裹才不会报错，没啥事可以都将属性包裹起来
+                    'font-weight':'bold'
+                }
+            }
+        })
+    </script>
+</body>
+</html>

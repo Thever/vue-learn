@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <h3>{{表达式}}可以直接处理输出结果，但是如果代码冗余且不能复用的话后期维护很麻烦，因此vue提供了methods计算属性的方式让人自定义方法调用</h3>
+    <p>计算属性自带缓存，只要相关依赖不变化就会用缓存中的结果响应节约资源；而计算方法则需要每次去计算</p>
+    <!--注意不要使用特定关键词-->
+    <div id="computed">
+        <p>默认值：{{numbefore}}</p>
+        <!--计算属性,自带缓存，只要 numbefore值不变化就去读缓存,属性调用不需要()-->
+        <p>计算属性获取变更值：{{numchanged}}</p>
+        <p>计算属性获取变更值：{{numchanged}}</p>
+        <p>计算属性获取变更值：{{numchanged}}</p>
+        <!--计算方法，没有缓存，每次需要时都去家属安获取结果,调用计算方法记得()-->
+        <p>方法获取变更值：{{numchanged2()}}</p>
+        <p>方法获取变更值：{{numchanged2()}}</p>
+        <p>方法获取变更值：{{numchanged2()}}</p>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el: '#computed',
+            data: {
+                numbefore: '123456789'
+            },
+            computed: {
+                // 计算属性的 getter
+                numchanged() {
+                    // `this` 指向 vm 实例
+                    console.log('计算属性调用了')
+                    return this.numbefore.split('').reverse().join('')
+                }
+            },
+            methods:{
+                numchanged2(){
+                    console.log('计算方法调用了')
+                    return this.numbefore.split('').reverse().join('')
+                }
+            }
+        })
+        //计算属性调用了
+        //计算方法调用了
+        //计算方法调用了
+        //计算方法调用了
+    </script>
+    <h3>侦听属性与计算属性类似，通过监听某个值的改变来进行处理,数据拼接监听用自带的计算属性效率更高</h3>
+    <div id="watch">
+        <p>firstName:{{firstName}}</p>
+        <p>lastName:{{lastName}}</p>
+        <p>fullName:{{fullName}}</p>
+        <p>fullName2:{{fullName2}}</p>
+    </div>
+    <script>
+        var vm2 = new Vue({
+            el:'#watch',
+            data:{
+                firstName:'迪奥',
+                lastName:'布兰度',
+                fullName:'迪奥 布兰度'
+            },
+            watch:{
+                /*watch监听返回的this.fullName由于原本没有定义会有报错，实际上获取的值是正确的*/
+                firstName(val){
+                    console.log('firstName被修改了')
+                    this.fullName = val+' '+this.lastName
+                },
+                lastName(val){
+                    console.log('lastName被修改了')
+                    this.fullName = this.firstName+' '+val
+                }
+            },
+            computed:{
+                fullName2(){
+                    console.log('利用计算属性来修改fullName')
+                    return this.firstName+' '+this.lastName
+                }
+            }
+        })
+        //上述watch与computed属性的结果一样
+    </script>
+    <h3>计算属性内部增加监听属性,get和set</h3>
+    <div id="computedProxy">
+        <p>firstName:{{firstName}}</p>
+        <p>lastName:{{lastName}}</p>
+        <p>fullName:{{fullName}}</p>
+    </div>
+    <script>
+        var vm3 = new Vue({
+            el:'#computedProxy',
+            data:{
+                firstName:'Dio',
+                lastName:'Brando'
+            },
+            computed:{
+                fullName:{
+                    get:function(){
+                        console.log('获取fullName')
+                        return this.firstName+' '+this.lastName
+                    },
+                    set:function(newValue){
+                        console.log('设置fullName')
+                        var names = newValue.split(' ')
+                        this.firstName = names[0]
+                        this.lastName = names[names.length - 1]
+                    }
+                }
+            }
+        })
+    </script>
+    <br>
+    <h3>监听异步加载</h3>
+    <div id="watch-example">
+        <p>
+            Ask a yes/no question:
+            <input v-model="question">
+        </p>
+        <p>{{ answer }}</p>
+    </div>
+    <!-- 因为 AJAX 库和通用工具的生态已经相当丰富，Vue 核心代码没有重复 -->
+    <!-- 提供这些功能以保持精简。这也可以让你自由选择自己更熟悉的工具。 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+    <script>
+        var watchExampleVM = new Vue({
+            el: '#watch-example',
+            data: {
+                question: '',
+                answer: 'I cannot give you an answer until you ask a question!'
+            },
+            watch: {
+                // 如果 `question` 发生改变，这个函数就会运行
+                question: function (newQuestion, oldQuestion) {
+                    this.answer = 'Waiting for you to stop typing...'
+                    this.debouncedGetAnswer()
+                }
+            },
+            created: function () {
+                // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+                // 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+                // AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+                // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+                // 请参考：https://lodash.com/docs#debounce
+                this.debouncedGetAnswer = _.debounce(this.getAnswer, 500)
+            },
+            methods: {
+                getAnswer: function () {
+                    if (this.question.indexOf('?') === -1) {
+                        this.answer = 'Questions usually contain a question mark. ;-)'
+                        return
+                    }
+                    this.answer = 'Thinking...'
+                    var vm = this
+                    axios.get('https://yesno.wtf/api')
+                        .then(function (response) {
+                            vm.answer = _.capitalize(response.data.answer)
+                        })
+                        .catch(function (error) {
+                            vm.answer = 'Error! Could not reach the API. ' + error
+                        })
+                }
+            }
+        })
+    </script>
+</body>
+</html>

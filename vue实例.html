@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="test">
+        {{a}}
+    </div>
+    <script>
+        //Vue的实例模式
+        var showModel = new Vue({
+            ...
+        })
+
+        //Vue实例化绑定数据
+        var data = {a:1}
+        var vm = new Vue({data:data})
+        data.a===vm.a   //true
+        data.a=2
+        vm.a        //2
+        /*vue只能获取实例化时提供的data属性，后面新增属性无法监控*/
+        data.b=3
+        vm.b        //undefined
+
+        //ES5 freeze()来冻结属性修改
+        var obj = {a:1}
+        obj.a   //1
+        obj.a=2
+        obj.a   //2
+        /*冻结对象避免属性操作*/
+        Object.freeze(obj)
+        var vm = new Vue({data:obj})
+        vm.a        //2
+        vm.a=3      //vue.js:6 Uncaught TypeError: Cannot assign to read only property 'a' of object '#<Object>'
+
+        /*注意:冻结对象要在vue实例绑定数据之前，绑定后再冻结指向对象会无效*/
+        var obj = {a:1}
+        var vm = new Vue({data:obj})
+        obj.a===vm.a    //true
+        obj.a=2
+        vm.a        //2
+        Object.freeze(obj)
+        vm.a=3
+        obj.a       //3,也就是说冻结失败
+
+        //vue的自有属性和方法
+        var data = {a:1}
+        var vm = new Vue({
+            el:'#test',
+            data:data
+        })
+
+        data.a===vm.a       //true
+        vm.$el===document.getElementById('test')    //true
+
+        /*增加监视器，当a的内容改变时执行,用变量接住可以取消监听*/
+        var unwatch = vm.$watch('a',function(newValue,oldValue){
+            console.log('new:'+newValue+',old:'+oldValue)
+        })
+        vm.a = 10   //new:10,old:1
+        /*取消监听*/
+        unwatch()
+        vm.a=1      //1,没有监听函数了
+
+        //生命周期
+        /*不绑定el对象*/
+        var vm = new Vue({
+            data:{
+                a:1
+            },
+            beforeCreate:function(){
+                console.log('创建Vue实例对象前')
+            },
+            /*创建实例阶段运行函数,不要用箭头函数啊，箭头函数不绑定this的会有坑*/
+            created:function(){
+                console.log('Vue实例对象已创建')
+            },
+            beforeMount:function(){
+                console.log('Vue实例还没加载')
+            },
+            mounted:function(){
+                console.log('Vue实例已经加载')
+            },
+            /*ES6简写*/
+            beforeUpdate(){
+                console.log('Vue更新数据前')
+            },
+            updated(){
+                console.log('Vue更新数据完毕')
+            },
+            beforeDestory:function(){
+                console.log('Vue实例销毁前')
+            },
+            destory:function(){
+                conosole.log('Vue实例已销毁')
+            }
+        })
+        //创建Vue实例对象前
+        //Vue实例对象已创建
+
+        /*绑定el对象*/
+        var vm = new Vue({
+            el:'#test',
+            data:{
+                a:1
+            },
+            beforeCreate:function(){
+                console.log('创建Vue实例对象前')
+            },
+            /*创建实例阶段运行函数,不要用箭头函数啊，箭头函数不绑定this的会有坑*/
+            created:function(){
+                console.log('Vue实例对象已创建')
+            },
+            beforeMount:function(){
+                console.log('Vue实例还没加载')
+            },
+            mounted:function(){
+                console.log('Vue实例已经加载')
+            },
+            beforeUpdate(){
+                console.log('Vue更新数据前')
+            },
+            updated(){
+                console.log('Vue更新数据完毕')
+            },
+            beforeDestory:function(){
+                console.log('Vue实例销毁前')
+            },
+            destory:function(){
+                conosole.log('Vue实例已销毁')
+            }
+        })
+        //创建Vue实例对象前
+        //Vue实例对象已创建
+        //Vue实例还没加载
+        //Vue实例已经加载
+        //<div id="test">{{1}}</div>
+
+
+        /*绑定template内容*/
+        var vm = new Vue({
+            el:'#test',
+            template:'<p>hello vue {{a}} </p>',
+            data:{
+                a:1
+            },
+            beforeCreate:function(){
+                console.log('创建Vue实例对象前')
+            },
+            /*创建实例阶段运行函数,不要用箭头函数啊，箭头函数不绑定this的会有坑*/
+            created:function(){
+                console.log('Vue实例对象已创建')
+            },
+            beforeMount:function(){
+                console.log('Vue实例还没加载')
+            },
+            mounted:function(){
+                console.log('Vue实例已经加载')
+            },
+            beforeUpdate(){
+                console.log('Vue更新数据前')
+            },
+            updated(){
+                console.log('Vue更新数据完毕')
+            },
+            beforeDestory:function(){
+                console.log('Vue实例销毁前')
+            },
+            destory:function(){
+                conosole.log('Vue实例已销毁')
+            }
+        })
+        //<div id="test">{{a}}</div> => <p>hello vue 1 </p>
+
+        vm.a=2
+        //Vue更新数据前
+        //Vue更新数据完毕
+    </script>
+</body>
+</html>

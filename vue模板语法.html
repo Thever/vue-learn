@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <b>动态渲染与单次渲染</b>
+    <div id="v-once">
+        <span>会修改:{{num}}</span>
+        <br>
+        <span v-once>不会修改:{{num}}</span>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#v-once',
+            data:{
+                num:0
+            },
+            created(){
+                setInterval(()=>{this.num++},1000)
+            }
+
+        })
+    </script>
+    <b>v-html直接生成html</b>
+    <div id="raw-html">
+        <p>这个是用双花括号表示的内容：{{show}}</p>
+        <p>这个是用raw-html渲染的内容：<span v-html="show"></span></p>
+    </div>
+    <script>
+        var vm2 = new Vue({
+            el:'#raw-html',
+            data:{
+                show:'<b>你好</b>'
+            }
+        })
+    </script>
+    <b>v-bind来绑定html属性</b>
+    <img src="rin.jpeg" id="rin" v-bind:alt="rin" v-bind:title="rin">
+    <script>
+        var vm3 = new Vue({
+            el:'#rin',
+            data:{
+                rin:'我凛美如画！'
+            }
+        })
+    </script>
+    <b title="a">v-bind缩写:来绑定属性</b>
+    <p id="dio" :title="word">jojo,人类是有极限的，我不做人了！</p>
+    <script>
+        var vm4 = new Vue({
+            el:'#dio',
+            data:{
+                word:'ko no dio da!'
+            }
+        })
+    </script>
+    <b>属性绑定控制状态</b>
+    <br>
+    <button id="clickBtn" :disable="isDisable">点我试试</button>
+    <script>
+        var vm5 = new Vue({
+            el:'#clickBtn',
+            data:{
+                isDisable:true
+            }
+        })
+    </script>
+    <b>输出模板中使用表达式</b>
+    <br>
+    <div id="jojo" :class="myclass" :title="'yo,'+myclass+'!'">{{num>0? '欧拉欧拉欧拉':'呀咧呀咧'}}</div>
+    <script>
+        var vm6 = new Vue({
+            el:'#jojo',
+            data:{
+                myclass:'jojoClass',
+                num:1
+            }
+        })
+    </script>
+    <br>
+    <b>v-if来决定显示/删除DOM</b>
+    <br>
+    <div id="v-if" v-if="seen">
+        你看到的到我
+    </div>
+    <script>
+        var vm7 = new Vue({
+            el:'#v-if',
+            data:{
+                seen:true
+            },
+            created(){
+                console.log('创建完成')
+                setInterval(()=>{
+                    this.seen = !this.seen
+                    console.log('this.seen:'+this.seen)
+                },1000)
+            }
+        })
+        //vm7.seen=false来删除容器
+    </script>
+    <b>v-on绑定方法，可以用@来简写</b>
+    <br>
+    <div id="v-on">
+        <p v-on:click="show(word1)">{{word1}}</p>
+        <p @click="dowrite(word2)">{{word2}}</p>
+    </div>
+    <script>
+        var vm8 = new Vue({
+            el:'#v-on',
+            data:{
+                word1:'点击第一个标签',
+                word2:'点击第二个标签'
+            },
+            methods:{
+              show(a){
+                  alert(a)
+              },
+              dowrite(a){
+                  console.log(a)
+              }
+            }
+        })
+    </script>
+    <br>
+    <p>修饰符'.'一般用来绑定特殊事件</p>
+    <div id="login">
+        <!--单纯用@sumbit='mySubmit'的话页面会默认进行跳转-->
+        <form action="/loginpage" @submit.prevent="mySubmit">
+            <button type="submit">点击试试</button>
+        </form>
+    </div>
+    <br>
+    <script>
+        var vm9 = new Vue({
+            el:'#login',
+            methods:{
+                mySubmit(){
+                    alert('阻止了默认submit的事件跳转')
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <p>组件注册命名规范只有2种</p>
+    <p>my-component-name,kebab-case带下划线的命名放昂视</p>
+    <p>MyComponentName，PascalCase首字母大写的方式</p>
+    <p>下面来个示例</p>
+    <div id="vm1">
+        <my-component-name></my-component-name>
+        <My-Component-Name></My-Component-Name>
+        <MY-COMPONENT-NAME></MY-COMPONENT-NAME>
+        <mycomponentname></mycomponentname>
+        <MyComponentName></MyComponentName>
+        <MYCOMPONENTNAME></MYCOMPONENTNAME>
+    </div>
+    <br>
+    <script>
+        Vue.component('my-component-name',{
+            template:'<h3>my-component-name</h3>'
+        })
+        Vue.component('My-Component-Name',{
+            template:'<h3>My-Component-Name</h3>'
+        })
+        Vue.component('MY-COMPONENT-NAME',{
+            template:'<h3>MY-COMPONENT-NAME</h3>'
+        })
+        Vue.component('mycomponentname',{
+            template:'<h3>mycomponentname</h3>'
+        })
+        Vue.component('MyComponentName',{
+            template:'<h3>MyComponentName</h3>'
+        })
+        Vue.component('MYCOMPONENTNAME',{
+            template:'<h3>MYCOMPONENTNAME</h3>'
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+
+        //测试结果是全小写或全小写中间用-拼接也行，这个和官网说的大驼峰命名不一样啊。。
+    </script>
+    <!--全局组件注册使用-->
+    <div id="vm2">
+        <my-part-name></my-part-name>
+        <p>全局组件不需要用component来引用引用，直接用组件名称标签即可</p>
+    </div>
+    <script>
+        Vue.component('my-part-name',{
+            template:'<h3>这里可以用字符串模板来写，为了兼容IE9以下需要用babel等工具进行编译，记得使用polyfill</h3>'
+        })
+        var vm2 = new Vue({
+            el:'#vm2'
+        })
+    </script>
+    <!--局部组件注册使用-->
+    <div id="vm3">
+        <sendpart></sendpart>
+        <p>局部组件注册使用</p>
+    </div>
+    <script>
+        var Getpart={
+            template:'<h3>适度使用局部组件可以减少打包后的文件大小,注意components，变量声明组件符合命名规范即可，components下指向获取组件名称时需要小写</h3>'
+        }
+        var vm3 = new Vue({
+            el:'#vm3',
+            components:{
+                sendpart:Getpart
+            }
+        })
+        //注意components，变量声明组件符合命名规范即可，components下指向获取组件名称时需要小写(sendpart)
+    </script>
+</body>
+</html>

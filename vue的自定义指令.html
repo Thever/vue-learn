@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <p>vue提供方法来拓展命令，方便项目检测使用</p>
+    <div id="vm1">
+        <input type="text" placeholder="输入框1">
+        <br>
+        <input type="text" placeholder="输入框2" v-focus="console.log('触发v-focus')">
+    </div>
+    <script>
+        Vue.directive('focus',{
+            inserted: function (el) {
+                // 聚焦元素
+                el.focus()
+                console.log('v-focus绑定已获取焦点')
+            }
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+    <p>自定义个钩子函数来查看调用情况</p>
+    <p>bind初始化使用，inserted插入时触发，updateVnode更新是触发，componentUpdatedVnode更新完成触发，unbind元素解绑时调用</p>
+    <div id="vm2" v-if="show">
+        <p v-allway>{{word}}</p>
+    </div>
+    <script>
+        Vue.directive('allway',{
+            bind(){console.log('bind')},
+            inserted(){console.log('inserted')},
+            update(){console.log('update')},
+            componentUpdated(){console.log('componentUpdated')},
+            unbind(){console.log('unbind')}
+        })
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                word:'jojo',
+                show:true
+            }
+        })
+        //vm2.word='ko no dio da!'   更新数据触发undate() componentUpdated()
+        //vm2.show=false  用关闭渲染的方式来触发unbind事件
+    </script>
+    <br>
+    <p>钩子函数提供了很多参数来获取对应内容</p>
+    <div id="vm3"  v-demo:foo.a.b="message">>
+
+    </div>
+    <script>
+        Vue.directive('demo', {
+            bind: function (el, binding, vnode) {
+                var s = JSON.stringify
+                el.innerHTML =
+                    'name: '       + s(binding.name) + '<br>' +
+                    'value: '      + s(binding.value) + '<br>' +
+                    'expression: ' + s(binding.expression) + '<br>' +
+                    'argument: '   + s(binding.arg) + '<br>' +
+                    'modifiers: '  + s(binding.modifiers) + '<br>' +
+                    'vnode keys: ' + Object.keys(vnode).join(', ')
+            }
+        })
+
+        var vm3 = new Vue({
+            el: '#vm3',
+            data: {
+                message: 'hello!'
+            }
+        })
+    </script>
+    <p>函数简写</p>
+    <div id="vm4">
+        <div v-color-watch="bgColor">hello,v-color-watch</div>
+    </div>
+    <script>
+        Vue.directive('color-watch',function (el, binding) {
+            //就是在实例绑定时更改背景色
+            el.style.backgroundColor = binding.value
+        })
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                bgColor:'red'
+            }
+        })
+    </script>
+    <p>对象的字面量指的是事件绑定传入的是个对象需要解构，调用时调用对应的属性即可</p>
+    <div id="vm5">
+        <div v-mycolor="{backgroundColor:'blue',color:'white'}">Hello</div>
+    </div>
+    <script>
+        Vue.directive('mycolor',function(el,binding){
+
+            if(binding.value.hasOwnProperty("bgColor")){
+                el.style.backgroundColor = binding.value.bgColor;
+            }
+            if(binding.value.hasOwnProperty("color")){
+                el.style.color = binding.value.color;
+            }
+        })
+        var app = new Vue({
+            el: '#vm5',
+            data: {
+            },
+
+        })
+    </script>
+    <p>自定义指令感觉更多的是配合钩子函数对组件和实例进行监控和处理</p>
+</body>
+</html>

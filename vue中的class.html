@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <style>
+        .fontSize14{
+            font-size:14px;
+        }
+        .red{
+            color:red;
+        }
+        .bold{
+            font-weight:bold;
+        }
+        /*给组件准备样式*/
+        .btnLoop{
+            overflow:hidden;
+            border-radius:5px;
+        }
+        .btnFontYellow{
+            color:yellow;
+        }
+        .btnBgBlack{
+            background:#000;
+        }
+    </style>
+    <div id="vueClass">
+        <!--注意class名称可以直接写或者用''包裹,动态绑定class在原本有class的情况下保留-->
+        <!--对象向语法-->
+        <p class="fontSize14" :class="{red:isRed,'bold':isBold}">看看这个字是不是红色，有没有加粗</p>
+        <!--数组语法,注意将数组内容指向class名称-->
+        <p class="fontSize14" :class="[redStyle,boldStyle]">是我dio哒！</p>
+        <!--混合使用数组语法与对象语法-->
+        <p class="fontSize14" :class="[{red:isRed},boldStyle]">混合写法1，是我dio哒！</p>
+        <p class="fontSize14" :class="[redStyle,{bold:isBold}]">混合写法2，ko no dio da!</p>
+        <!--混合写法1 2样式不同，按照预期得到混合写法需要将判断的内容放到对象中最先放入，随后放入其他输出样式，注意混合-->
+        <!--写法还是数组形式，注意将变量名指向classname-->
+        <!--三元表达式,数组形式包裹，注意指向-->
+        <p class="fontSize14" :class="[isRed? redStyle:'',boldStyle]">看看这个字是不是红色，有没有加粗</p>
+        <button @click="changeClass">点我切换样式</button>
+        <br>
+        <!--组件只是提供默认的结构样式，不需要的class能用v-bind指定classname:false来消除-->
+        <btnLoop :class="[{btnFontYellow:isbtnYellow,btnLoop:isFalse},btnbgblack]">这个是调用组件输入的文字</btnLoop>
+    </div>
+    <script>
+        // 声明组件
+        Vue.component = ('myBtn',{
+            props:[],
+            template:'<button class="btnLoop">组件定义的文字</button>'
+            // 组件里的文字内容并不会保存输出，只是继承样式
+        })
+        var vm1 = new Vue({
+            el:'#vueClass',
+            data:{
+                isRed:true,
+                isBold:false,
+                redStyle:'red',
+                boldStyle:'bold',
+                isTrue:true,
+                isFalse:false,
+                btnbgblack:'btnBgBlack',
+                isbtnYellow:true
+            },
+            methods:{
+                changeClass(){
+                    this.isRed = !this.isRed
+                    this.isBold = !this.isBold
+                }
+            }
+        })
+    </script>
+</body>
+</html>

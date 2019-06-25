@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+</head>
+<body>
+    <div id="vm1">
+        <my-part @way1="show(1)" @way2="show(2)" @way3="show(3)"></my-part>
+    </div>
+    <script>
+        Vue.component('my-part',{
+            props:['post'],
+            template:`
+                <div>
+                    <p @click="$emit('way1')">打印1</p>
+                    <p @click="$emit('way2')">打印2</p>
+                    <p @click="$emit('way3')">打印3</p>
+                </div>
+            `
+        })
+        var vm1 = new Vue({
+            el:'#vm1',
+            methods:{
+                show(word){
+                    console.log(word)
+                }
+            }
+        })
+        //1.组件中用$emit来定义方法名称
+        //2.实例化中将$emit定义的方法名称指向实例化的方法，用$event来获取抛出的值
+    </script>
+    <p>写一个通用传值的案例</p>
+    <div id="vm2">
+        <p>自己绑定事件监测是否被选中：{{lovingVal}}</p>
+        <base-checkbox :checked="lovingVal" @change="onChange"></base-checkbox>
+        <p>用v-model检查是否被选中{{lovingVal}}</p>
+        <base-checkbox v-model="lovingVal"></base-checkbox>
+        <!--两个input-checkbox联动的原因是共用数据，数据要独立的话组件内用data return值吧-->
+    </div>
+    <script>
+        Vue.component('base-checkbox', {
+            model: {
+                prop: 'checked',
+                event: 'change'
+            },
+            props: {
+                checked: Boolean
+            },
+            template: `
+                <input
+                  type="checkbox"
+                  v-bind:checked="checked"
+                  v-on:change="$emit('change', $event.target.checked)"
+                >
+              `
+        })
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                lovingVal:true
+            },
+            methods:{
+                onChange(val){
+                    this.lovingVal=val
+                }
+            }
+        })
+        //实例化默认选中状态为lovingVal，然后监听input change事件用来抛出checked状态再对LovingVal参数进行修改
+        //自己写事件一定要抛出值，不然后面就没参数了
+    </script>
+    <br>
+    <p>将原生事件绑定到组件上</p>
+    <div id="vm3">
+        <base-input @click.native="jojo" value="点击有惊喜"></base-input>
+    </div>
+    <script>
+        Vue.component('base-input',{
+            template:`
+                <input
+                    v-bind="$attrs"
+                >
+            `
+        })
+        var vm3 = new Vue({
+            el:'#vm3',
+            methods:{
+                jojo(){
+                    alert('ko no dio da!')
+                }
+            }
+        })
+        //在组件中用v-bind="$attrs"加实例化调用(@事件名.native='调用函数')的方式来让组件触发原生事件
+        //v-bind="$attrs"不能简写成:="$attrs"，无法识别
+        //v-bind="$attrs"需要绑定根元素才会正常调用
+    </script>
+    <br>
+    <p>对原本的组件进行调整</p>
+    <div id="vm4">
+        <updated-input :label="'路人甲？'" @click.native="onClick" @focus.naive="onFocus"></updated-input>
+    </div>
+    <script>
+        Vue.component('updated-input',{
+            inheritAttrs:false,
+            props:['label','value'],
+            computed:{
+                AddedListern(){
+                    //变量存储整个对象
+                    var vm = this
+                    //合并返回一个新对象
+                    return Object.assign(
+                        //vue官方文档添加首个空对象，意义不明
+                        {},
+                        //传入原本的插件的监听方法
+                        this.listeners,
+                        //添加自己写的监听方法
+                        {
+                            //写个方法确保v-model工作
+                            input:function(event){
+                                $emit('input',$event.target.value)
+                            },
+                            //写入点击事件的方法
+                            click:function(){
+                                console.log('调用了内部的click方法')
+                            },
+                            //写入获取焦点的方法
+                            focus(){
+                                console.log('调用了内部的focus方法')
+                            }
+                        }
+                    )
+                }
+            },
+            template:`
+                <label>
+                  {{ label }}
+                  <input
+                    v-bind="$attrs"
+                    v-on="AddedListern"
+                  >
+                </label>
+            `
+        })
+        var vm4 = new Vue({
+            el:'#vm4',
+            methods:{
+                onClick(){
+                    console.log('调用外部click方法')
+                },
+                onFocus(){
+                    console.log('调用外部focus方法')
+                }
+            }
+        })
+        //总结下原理：
+        //1.用computed动态生成一个新的监听方法，包含原本的监听+自己定义的新方法,用函数形式返回是为了获取原本的事件方法
+        //2.将生成的监听方法绑定给需要的组件部分进行兼容即可
+        //3.inherit能够避免组件继承父类值，focus事件的确如此，但是click事件也触发了，也许是点击穿透的问题，不是很懂里面的机制，后面看看源码读读源码解析吧
+    </script>
+    <br>
+    <p>组件的复用，还是$emit用来提供方法+参数</p>
+    <div id="vm5">
+        <post-way :val="mydata.val" @update:val="mydata.val=$event"></post-way>
+    </div>
+    <script>
+        Vue.component('post-way',{
+            props:['val'],
+            template:`
+                <label>
+                    {{val}}
+                    <input type="text" @input="postVal">
+                </label>
+            `,
+            methods:{
+                postVal(event){
+                    let newVal = event.target.value;
+                    // console.log('获取的input值',newVal)
+                    //获取提供当前的方法名和传出值
+                    this.$emit('update:val',newVal)
+                }
+            }
+        })
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                mydata:{
+                    val:'',
+                    name:'jojo'
+                }
+            }
+        })
+        //总结：
+        //1.$emit放到外部函数引用时注意绑定this提供对象
+        //2.官网建议的命名是abc:xyz的方式语意化命名，而不是a.b属性命名，其实你可以直接用小驼峰命名
+        //3.核心还是$emit发送方法名+参数，不清楚的话可以打印出事件查看内容再结构
+    </script>
+</body>
+</html>

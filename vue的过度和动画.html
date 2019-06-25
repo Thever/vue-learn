@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!--<script src="vue.js"></script>-->
+</head>
+<body>
+    <!--用vue中的transition标签来实现动画-->
+    <style>
+        .myword{
+            font-size:1rem;
+            color:red;
+        }
+        /*.fade-enter-active, .fade-leave-active {*/
+            /*transition: opacity .5s;*/
+        /*}*/
+        /*.fade-enter, .fade-leave-to !* .fade-leave-active below version 2.1.8 *! {*/
+            /*opacity: 0;*/
+        /*}*/
+
+        /*自己写过度样式,transition中的name+对应状态*/
+        .fade-enter{
+            color:red;
+            font-size:1rem;
+        }
+        .fade-enter-active{
+            transition: all 5s;
+        }
+        .fade-enter-to{
+            color:blue;
+            font-size:2rem;
+        }
+        .fade-leave{
+            color:blue;
+            font-size:2rem;
+        }
+        .fade-leave-active{
+            transition: all 5s;
+        }
+        .fade-to{
+            color:red;
+            font-size:1rem;
+        }
+        /*这里的6个状态指示为了写对象状态切换的补间帧，私自添加样式可能与两个状态样式不同，这里赋予样式是为了做辨识*/
+        /*一般这里写一些渐变的特效即可，不要写样式*/
+    </style>
+    <div id="vm1">
+        <button @click="show=!show">toggle</button>
+        <transition name="fade">
+            <p class="myword" v-if="show">hello</p>
+        </transition>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                show:false
+            }
+        })
+    </script>
+    <br><br><br><br>
+    <!--补间帧的官方案例-->
+    <style>
+        /* 可以设置不同的进入和离开动画 */
+        /* 设置持续时间和动画函数 */
+        .slide-fade-enter-active {
+            transition: all .3s ease;
+        }
+        .slide-fade-leave-active {
+            transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+        }
+        .slide-fade-enter, .slide-fade-leave-to
+            /* .slide-fade-leave-active for below version 2.1.8 */ {
+            transform: translateX(10px);
+            opacity: 0;
+        }
+    </style>
+    <div id="vm2">
+        <button @click="show = !show">
+            Toggle render
+        </button>
+        <transition name="slide-fade">
+            <p v-if="show">炫酷特效</p>
+        </transition>
+    </div>
+    <script>
+        var vm2 = new Vue({
+            el: '#vm2',
+            data: {
+                show: true
+            }
+        })
+    </script>
+    <!--css动画-->
+    <style>
+        .bounce-enter-active {
+            animation: bounce-in .5s;
+        }
+        .bounce-leave-active {
+            animation: bounce-in .5s reverse;
+            /*reverse表明让动画帧数反向播放*/
+        }
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+    <div id="vm3">
+        <button @click="show = !show">Toggle show</button>
+        <transition name="bounce">
+            <p v-if="show">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris facilisis enim libero, at lacinia diam fermentum id. Pellentesque habitant morbi tristique senectus et netus.</p>
+        </transition>
+    </div>
+    <script>
+        var vm3=new Vue({
+            el: '#vm3',
+            data: {
+                show: true
+            }
+        })
+        //直接用css3来做补间动画感觉挺靠谱
+    </script>
+    <!--如果要应用外部动画库的，要主要命名方式，与手动写css样式的排序颠倒-->
+    <!--这个案例是引用外部css库来作为补间帧的内容-->
+    <!--enter-class-->
+    <!--enter-active-class-->
+    <!--enter-to-class (2.1.8+)-->
+    <!--leave-class-->
+    <!--leave-active-class-->
+    <!--leave-to-class (2.1.8+)-->
+    <div id="vm4">
+        <button @click="show = !show">点击切换</button>
+        <transition
+            name="myown"
+            enter-active-class="animated tada"
+            leave-active-class="animated bounceOutRight"
+            :duration="{ enter: 500, leave: 800 }"
+        >
+            <p v-if="show">jojo,是我dio哒！我不做人啦！</p>
+        </transition>
+    </div>
+    <script>
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                show:true
+            }
+        })
+    </script>
+    <!--现在来监听vue补间帧的状态-->
+    <div id="vm5">
+        <button @click="show = !show">触发动画监听事件</button>
+        <transition
+            @before-enter="beforeEnter"
+            @enter="enter"
+            @after-enter="afterEnter"
+            @enter-cancelled="enterCancelled"
+
+            @before-leave="beforeLeave"
+            @leave="leave"
+            @after-leave="afterLeave"
+            @leave-cancelled="leaveCancelled"
+        >
+            <p v-if="show">用vue提供的动画事件来监听切换动画的变化</p>
+        </transition>
+    </div>
+    <script>
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                show:true
+            },
+            methods:{
+                // --------
+                // 进入中
+                // --------
+
+                beforeEnter: function (el) {
+                    // ...
+                    console.log('beforeEnter')
+                },
+                // 当与 CSS 结合使用时
+                // 回调函数 done 是可选的
+                enter: function (el, done) {
+                    // ...
+                    done()
+                    console.log('enter')
+                },
+                afterEnter: function (el) {
+                    // ...
+                    console.log('afterEnter')
+                },
+                enterCancelled: function (el) {
+                    // ...
+                    console.log('enterCancelled')
+                },
+
+                // --------
+                // 离开时
+                // --------
+
+                beforeLeave: function (el) {
+                    // ...
+                    console.log('beforeLeave')
+                },
+                // 当与 CSS 结合使用时
+                // 回调函数 done 是可选的
+                leave: function (el, done) {
+                    // ...
+                    done()
+                    console.log('leave')
+                },
+                afterLeave: function (el) {
+                    // ...
+                    console.log('afterLeave')
+                },
+                // leaveCancelled 只用于 v-show 中
+                leaveCancelled: function (el) {
+                    // ...
+                    console.log('leaveCancelled')
+                }
+            }
+        })
+    </script>
+    <!--用官方的 Velocity.js推荐的简单例子-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <div id="vm6">
+        <button @click="show = !show">
+            切换
+        </button>
+        <transition
+                v-on:before-enter="beforeEnter"
+                v-on:enter="enter"
+                v-on:leave="leave"
+                v-bind:css="false"
+        >
+            <p v-if="show">
+                1、百度网盘Linux版发布：专为中标麒麟操作系统打造
+                2、新氧科技将在成都建立第二总部 年内将完成
+                3、中国铁道学会理事长：高铁正研究时速向400公里提升可能性
+                4、发改委：严厉打击制冷产品能效虚标、认证检测作假等行为
+                5、跑跑卡丁车手游7月2日正式上线
+                6、屠呦呦团队今天将发布重大科研突破
+                7、华为回应锁屏广告事件：并非官方所为
+                8、汕头大学：首推本科生学费全额奖励计划 年上限 1 亿元
+            </p>
+        </transition>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#vm6',
+            data: {
+                show:true,
+            },
+            methods:{
+                beforeEnter: function (el) {
+                    el.style.opacity = 0
+                    el.style.transformOrigin = 'left'
+                },
+                enter: function (el, done) {
+                    Velocity(el, { opacity: 1, fontSize: '1.4em' }, { duration: 300 })
+                    Velocity(el, { fontSize: '1em' }, { complete: done })
+                },
+                leave: function (el, done) {
+                    Velocity(el, { translateX: '15px', rotateZ: '50deg' }, { duration: 600 })
+                    Velocity(el, { rotateZ: '100deg' }, { loop: 2 })
+                    Velocity(el, {
+                        rotateZ: '45deg',
+                        translateY: '30px',
+                        translateX: '30px',
+                        opacity: 0
+                    }, { complete: done })
+                }
+
+            }
+        })
+    </script>
+    <!--transition appear用来处理初次渲染的功能样式-->
+    <style>
+        /*命名方式和默认的切换动画一致*/
+        .custom-appear-active{
+            color: #2fe26d;
+            background: #b6b6b6;
+            transition: all 1s ease;
+        }
+        .custom-appear{
+            font-size: 40px;
+            color: #e069e2;
+            background: #7798e2;
+        }
+        .custom-appear-to{
+            color: #e29138;
+            background: #1c8942;
+        }
+    </style>
+    <!--appear默认也有设定的样式，只是vue现在的官方文档里没写-->
+    <div id="vm7">
+        <button @click="show = !show">点击切换</button>
+        <transition
+                appear
+                appear-class="custom-appear"
+                appear-to-class="custom-appear-to"
+                appear-active-class="custom-appear-active"
+                v-on:before-appear="myBeforeAppearHook"
+                v-on:appear="myAppearHook"
+                v-on:after-appear="myfterAppearHook"
+                v-on:appear-cancelled="myAppearCancelledHook"
+        >
+           <p v-if="show">appear用来处理初次渲染的情况</p>
+        </transition
+                appear>
+    </div>
+    <script>
+        var vm7 = new Vue({
+            el:'#vm7',
+            data:{
+                show:true
+            },
+            methods:{
+                myBeforeAppearHook(){
+                    console.log('before appear')
+                },
+                myAppearHook(){
+                    console.log('appear')
+                },
+                myfterAppearHook(){
+                    console.log('after appear')
+                },
+                myAppearCancelledHook(){
+                    console.log('appear cancell')
+                }
+            }
+        })
+    </script>
+    <br>
+    <!--多个元素的过度,也就是内容的切换，动画只是过度的补间-->
+    <style>
+        td{display:block;font-weight:bold;}
+    </style>
+    <div id="vm8">
+        <transition>
+            <table v-if="mytable.length>0">
+                <td v-for="item in mytable">
+                    {{item.word}}
+                </td>
+            </table>
+            <p v-else>抱歉没有相关信息</p>
+        </transition>
+    </div>
+    <script>
+        var vm8 = new Vue({
+            el:'#vm8',
+            data:{
+                mytable:[
+                    {index:1,word:'jojo'},
+                    {index:2,word:'dio'},
+                    {index:3,word:'sekiro'},
+                ],
+                show:true
+            }
+        })
+    </script>
+    <!--vue为了追求效率会尽可能进行组件复用，辨识不同的组件需要添加key来标识-->
+    <div id="vm9">
+        <transition>
+            <button :key="buttonName">
+                {{buttonWord}}
+            </button>
+        </transition>
+    </div>
+    <script>
+        var vm9 = new Vue({
+            el:'#vm9',
+            data:{
+                buttonName:'save'
+            },
+            computed:{
+                buttonWord(){
+                    switch (this.buttonName){
+                        case 'save':return '保存'
+                        case 'edit':return '编辑'
+                        case 'submit':return '发送'
+                    }
+                }
+            }
+        })
+    </script>
+    <br>
+    <!--过度模式-->
+    <style>
+        .myfade-enter{
+            transform: translateX(-10px);
+            opacity: 0;
+        }
+        .myfade-enter-to{
+            transform: translateX(0px);
+            opacity: 1;
+        }
+        .myfade-enter-active{
+            transition: all 0.5s ease;
+        }
+        .myfade-leave{
+            transform: translateX(0px);
+            opacity: 1;
+        }
+        .myfade-leave-to{
+            transform: translateX(10px);
+            opacity: 0;
+        }
+        .myfade-leave-active{
+            transition:all 0.5s ease;
+        }
+        #vm10{
+            display:block;
+        }
+    </style>
+    <div id="vm10">
+        <button @click="show=!show">点击切换</button>
+        <br>
+        <!--这个版本的vue不添加mod="out-in"也能顺畅切换，也许是版本更新了？或许现在默认out-in-->
+        <!--in-out：新元素先进行过渡，完成之后当前元素过渡离开。-->
+        <!--out-in：当前元素先进行过渡，完成之后新元素过渡进入。-->
+        <transition name="myfade" mode="out-in">
+            <button v-if="show">
+                on
+            </button>
+            <button v-else>
+                off
+            </button>
+            <!--这里注释掉v-else那么myfade的样式就能奇效，v-if是决定是否渲染，那么这样看来这个切换的效果应该是appear来控制了-->
+        </transition>
+    </div>
+    <script>
+        var vm10 = new Vue({
+            el:'#vm10',
+            data:{
+                show:true
+            }
+        })
+    </script>
+    <!--来写一个动态组件-->
+    <br>
+    <style>
+        .mygo-enter{
+            transform: translateX(-10px);
+            opacity: 0;
+        }
+        .mygo-enter-to{
+            transform: translateX(0px);
+            opacity: 1;
+        }
+        .mygo-enter-active{
+            transition: all 0.5s ease;
+        }
+        .mygo-leave{
+            transform: translateX(0px);
+            opacity: 1;
+        }
+        .mygo-leave-to{
+            transform: translateX(10px);
+            opacity: 0;
+        }
+        .mygo-leave-active{
+            transition:all 0.5s ease;
+        }
+    </style>
+    <div id="vm11">
+        <button @click="change">点击切换</button>
+        <br>
+        <keep-alive>
+            <transition name="mygo" mode="out-in">
+                <component v-bind:is="view"></component>
+            </transition>
+        </keep-alive>
+    </div>
+    <script>
+        Vue.component('btn-on',{
+            template:'<input value="on">'
+        })
+        Vue.component('btn-off',{
+            template:'<input value="off">'
+        })
+        Vue.component('btn-more',{
+            template:'<input value="more">'
+        })
+        var vm11 = new Vue({
+            el:'#vm11',
+            data:{
+                view:'btn-on'
+            },
+            methods:{
+                change(){
+                    if(this.view==='btn-on'){
+                        this.view='btn-off'
+                    }else if(this.view==='btn-off'){
+                        this.view='btn-more'
+                    }else{
+                        this.view='btn-on'
+                    }
+                }
+            }
+        })
+        //keep-alive标签页可嵌套component,但是缓存的仅仅是组件本身，不会缓存后面操作添加的内容，切换只是再次将组件初始化。
+    </script>
+    <!--列表过度用来渲染多内容对象的,transition-group用来做多内容对象的过度动画-->
+    <style>
+        .list-item {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .list-enter-active, .list-leave-active {
+            transition: all 1s;
+        }
+        .list-enter, .list-leave-to
+            /* .list-leave-active for below version 2.1.8 */ {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+    </style>
+    <div id="vm12">
+        <button v-on:click="add">Add</button>
+        <button v-on:click="remove">Remove</button>
+        <transition-group name="list" tag="p">
+            <span v-for="item in items" v-bind:key="item" class="list-item">
+              {{ item }}
+            </span>
+        </transition-group>
+    </div>
+    <script>
+        var vm12 = new Vue({
+            el: '#vm12',
+            data: {
+                items: [1,2,3,4,5,6,7,8,9],
+                nextNum: 10
+            },
+            methods: {
+                randomIndex: function () {
+                    return Math.floor(Math.random() * this.items.length)
+                },
+                add: function () {
+                    this.items.splice(this.randomIndex(), 0, this.nextNum++)
+                },
+                remove: function () {
+                    this.items.splice(this.randomIndex(), 1)
+                },
+            }
+        })
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
+    <br>
+    <!--vue用v-move来处理组件位置变化时的动画处理,也就是transition-group添加name='name'引用，然后用.name-move来设置位移过度样式-->
+    <style>
+        .flip-list-move {
+            transition: transform 1s;
+        }
+        .list-move{
+            transition: transform 3s;
+        }
+    </style>
+    <div id="vm13" class="demo">
+        <button v-on:click="shuffle">Shuffle</button>
+        <transition-group name="flip-list" tag="ul">
+            <li v-for="item in items" v-bind:key="item">
+                {{ item }}
+            </li>
+        </transition-group>
+        <!--自己写位移过度动画-->
+        <transition-group name="list" tag="ul">
+            <li v-for="item in items" v-bind:key="item">
+                {{ item }}
+            </li>
+        </transition-group>
+    </div>
+    <script>
+        var vm13 = new Vue({
+            el: '#vm13',
+            data: {
+                items: [1,2,3,4,5,6,7,8,9]
+            },
+            methods: {
+                shuffle: function () {
+                    this.items = _.shuffle(this.items)
+                }
+            }
+        })
+    </script>
+    <!--综合修复-->
+    <style>
+        .list-complete-item {
+            transition: all 1s;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .list-complete-enter, .list-complete-leave-to
+            /* .list-complete-leave-active for below version 2.1.8 */ {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .list-complete-leave-active {
+            position: absolute;
+        }
+        /*注意list-complete是申明了的动画样式*/
+        /*需要注意的是使用 FLIP 过渡的元素不能设置为 display: inline 。作为替代方案，可以设置为 display: inline-block 或者放置于 flex 中*/
+    </style>
+    <div id="vm14" class="demo">
+        <button v-on:click="shuffle">Shuffle</button>
+        <button v-on:click="add">Add</button>
+        <button v-on:click="remove">Remove</button>
+        <transition-group name="list-complete" tag="p">
+            <span
+                    v-for="item in items"
+                    v-bind:key="item"
+                    class="list-complete-item"
+            >
+              {{ item }}
+            </span>
+        </transition-group>
+    </div>
+    <script>
+        var vm14 = new Vue({
+            el: '#vm14',
+            data: {
+                items: [1,2,3,4,5,6,7,8,9],
+                nextNum: 10
+            },
+            methods: {
+                randomIndex: function () {
+                    return Math.floor(Math.random() * this.items.length)
+                },
+                add: function () {
+                    this.items.splice(this.randomIndex(), 0, this.nextNum++)
+                },
+                remove: function () {
+                    this.items.splice(this.randomIndex(), 1)
+                },
+                shuffle: function () {
+                    this.items = _.shuffle(this.items)
+                }
+            }
+        })
+    </script>
+    <!--从这里来看，transition应用于内部展示元素的切换，transition-group则是表示一个群体中内容的而变化-->
+    <!--可复用的过度就是将内容方法封装成组件方便多次使用，记得用slot接受外部输出的内容-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <div id="dynamic-fade-demo" class="demo">
+        Fade In: <input type="range" v-model="fadeInDuration" min="0" v-bind:max="maxFadeDuration">
+        Fade Out: <input type="range" v-model="fadeOutDuration" min="0" v-bind:max="maxFadeDuration">
+        <transition
+                v-bind:css="false"
+                v-on:before-enter="beforeEnter"
+                v-on:enter="enter"
+                v-on:leave="leave"
+        >
+            <p v-if="show">hello</p>
+        </transition>
+        <button
+                v-if="stop"
+                v-on:click="stop = false; show = false"
+        >Start animating</button>
+        <button
+                v-else
+                v-on:click="stop = true"
+        >Stop it!</button>
+    </div>
+    <script>
+        new Vue({
+            el: '#dynamic-fade-demo',
+            data: {
+                show: true,
+                fadeInDuration: 1000,
+                fadeOutDuration: 1000,
+                maxFadeDuration: 1500,
+                stop: true
+            },
+            mounted: function () {
+                this.show = false
+            },
+            methods: {
+                beforeEnter: function (el) {
+                    el.style.opacity = 0
+                },
+                enter: function (el, done) {
+                    var vm = this
+                    Velocity(el,
+                        { opacity: 1 },
+                        {
+                            duration: this.fadeInDuration,
+                            complete: function () {
+                                done()
+                                if (!vm.stop) vm.show = false
+                            }
+                        }
+                    )
+                },
+                leave: function (el, done) {
+                    var vm = this
+                    Velocity(el,
+                        { opacity: 0 },
+                        {
+                            duration: this.fadeOutDuration,
+                            complete: function () {
+                                done()
+                                vm.show = true
+                            }
+                        }
+                    )
+                }
+            }
+        })
+    </script>
+</body>
+</html>

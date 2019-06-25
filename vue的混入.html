@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <p>vue的混入是指Vue实例化或组件的参数通过外部变量传入进行配置</p>
+    <div id="vm1">
+        {{word}}
+    </div>
+    <script>
+        var mymix={
+            data:{
+                word:'这个是通过vue的混入从外面传入的值'
+            }
+        }
+        var vm1=new Vue({
+            el:'#vm1',
+            mixins:[mymix]
+        })
+    </script>
+    <br>
+    <p>vue的混入，data中冲突的数据会以本身有限，相同条件的事件会被合并</p>
+    <!--组件混入-->
+    <div id="vm2">
+        <my-btn></my-btn>
+    </div>
+    <script>
+        var mymix2={
+            data:function(){
+                return {
+                    word:'这个是外部给组件传的值'
+                }
+            },
+            created:function(){
+                console.log('外部传入的created事件方法')
+            }
+        }
+        Vue.component('my-btn',{
+            data:function(){
+                return {
+                    word:'这个是组件本身携带的值'
+                }
+            },
+            mixins:[mymix2],
+            template:'<b>{{word}}</b>',
+            created:function(){
+                console.log('组件内部created事件的调用方法')
+            }
+        })
+        var vm2 = new Vue({
+            el:'#vm2'
+        })
+    </script>
+    <!--实例混入-->
+    <div id="vm3">
+        {{word}}
+    </div>
+    <script>
+        var mymix3 = {
+            data:{
+                word:'mixin外部传入的内容'
+            },
+            created:function(){
+                console.log('调用混入的外部事件')
+            },
+            methods:{
+                showWord(){
+                    console.log('调用外部的showWord方法')
+                }
+            }
+        }
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                word:'实例本身word的内容'
+            },
+            methods:{
+                showWord(){
+                    console.log('调用内部的showWord方法')
+                }
+            },
+            created:function(){
+                console.log('调用内部的mixin事件')
+            },
+            mixins:[mymix3]
+        })
+    </script>
+    <br>
+    <p>全局混入的概念就是用混入给全局定义的组件提供了内容，要合理操作</p>
+</body>
+</html>

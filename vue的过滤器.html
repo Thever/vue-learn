@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vm1">
+        <input type="number" v-model="num">
+        <!--使用单个过滤器-->
+        <p>{{num |  filter1}}</p>
+        <!--使用多个过滤器-->
+        <p>{{num | filter1 | filter2}}</p>
+    </div>
+    <script>
+        //全局声明过滤器
+        Vue.filter('filter1', function (value) {
+            let val=parseFloat(value)
+            if(val>0){
+                return + val
+            }else{
+                return - val
+            }
+        })
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                num:1000
+            },
+            //实例化中声明过滤器
+            filters:{
+                filter2(val){
+                    return val + '----more'
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <!--默认操作虚拟dom-->
+    <div id="vm1">
+        <p>num为{{num}}</p>
+        <p>默认调用的computed获取的值为{{numAdd}}</p>
+        <button @click="clickAdd">点我增加数量</button>
+        <!--用$rott来管理根节点-->
+        <p>根节点操作获取的computed值为{{numAdd2}}</p>
+        <button @click="clickAdd2">用根节点方法操作</button>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                num:1
+            },
+            computed:{
+                numAdd(){
+                    return this.num + 1
+                },
+                numAdd2(){
+                    return this.$root.num+1
+                }
+            },
+            methods:{
+                clickAdd(){
+                    this.num++
+                },
+                clickAdd2(){
+                    this.$root.num++
+                }
+
+            }
+        })
+    </script>
+    <br>
+    <!--用$parent来获取修改父组建的内容-->
+    <div id="vm2">
+        <p>当前的num:{{num}}</p>
+        <my-son></my-son>
+    </div>
+    <script>
+        Vue.component('my-son',{
+            template:`
+                <button @click="addFather">点击增加数量</button>
+            `,
+            methods:{
+                addFather(){
+                    //console.log(this)
+                    this.$parent.num++
+                }
+            }
+        })
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                num:0
+            }
+        })
+    </script>
+    <br>
+    <!--ref给组件类似id的身份用于操作-->
+    <div id="vm3">
+        <p>num的数量为{{num}}</p>
+        <my-ref ref="jojo"></my-ref>
+        <button @click="showrefs">点击显示内容</button>
+    </div>
+    <script>
+        Vue.component('my-ref',{
+            template:`
+               <p>这个是ref模板的内容</p>
+            `,
+            methods:{
+                addnum(){
+                    this.$parent.num++
+                }
+            }
+        })
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                num:0
+            },
+            methods:{
+                showrefs(){
+                    //console.log('$refs',this.$refs)
+                    let $myjojo=this.$refs.jojo
+                    $myjojo.addnum()
+                }
+            }
+        })
+    </script>
+    <!--$root获取根实例，$refs获取绑定ref的组件信息-->
+    <!--多层级嵌套结构用$parent层层递进获取信息会受到整体结构组件的影响，vue依赖注入提供了后代通用的provide,inject跨层提供方法-->
+    <div id="vm4">
+        <my-container>
+            <mybtn1></mybtn1>
+        </my-container>
+        <!--data是data,属性是属性，vm4.$refs.jojo.count===0,注意区分-->
+        <my-container ref="jojo" :count="1">
+            <word1>
+                <mybtn1></mybtn1>
+            </word1>
+        </my-container>
+        <my-container>
+            <word1>
+                <word2>
+                    <mybtn1></mybtn1>
+                </word2>
+            </word1>
+        </my-container>
+    </div>
+    <script>
+        Vue.component('my-container',{
+            template:`
+                <div>
+                    <p>count:{{count}}</p>
+                    <slot></slot>
+                </div>
+            `,
+            data:function(){
+                return {
+                    count : 0
+                }
+            },
+            provide:function(){
+                return {
+                    getcount:this.getcount,
+                    addcount:this.addcount
+                }
+            },
+            methods:{
+                getcount(){
+                    return this.count
+                },
+                addcount(){
+                    this.count++
+                }
+            }
+        })
+        Vue.component('mybtn1',{
+            template:`
+                <div>
+                    <button @click="mygetcount">点我打印count值</button>
+                    <button @click="myaddcount">点我count++</button>
+                </div>
+            `,
+            inject:['getcount','addcount'],
+            methods:{
+                //注意调用方法
+                mygetcount(){
+                    this.getcount()
+                    console.log(this.getcount())
+                },
+                myaddcount(){
+                    this.addcount()
+                }
+            }
+        })
+        Vue.component('word1',{
+            template:`
+                <div>
+                    <p>jojo,我不做人啦！</p>
+                    <slot></slot>
+                </div>
+            `
+        })
+        Vue.component('word2',{
+            template:`
+                <div>
+                    <p>是我dio哒！</p>
+                    <slot></slot>
+                </div>
+            `
+        })
+        var vm4 = new Vue({
+            el:'#vm4'
+        })
+    </script>
+</body>
+</html>

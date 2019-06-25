@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vm1">
+        <p>count：{{count}}</p>
+        <button @click="countadd">count++</button>
+        <button @click.once="countadd">count+1</button>
+    </div>
+    <script>
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+                count:0
+            },
+            mounted:function(){
+                //加载时增加监听added事件
+                this.$on('added',function(val){
+                    console.log('自定义added获取的值',val)
+                })
+            },
+            methods:{
+                countadd(){
+                    this.count++
+                    console.log(this.count)
+                    //发送自定义事件added
+                    this.$emit('added',this.count)
+                }
+            }
+        })
+    </script>
+    <!--用$on,$off来开关自定义监听事件-->
+    <div id="vm2">
+        <p>num：{{num}}</p>
+        <button @click="numadd">num++</button>
+        <button @click="listenclose">关闭自定义事件监听</button>
+        <button @click="listenopen">打开自定义事件监听</button>
+    </div>
+    <script>
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+                num:0
+            },
+            mounted:function(){
+                this.$on('added',function(val){
+                    console.log('added获取的val',val)
+                })
+            },
+            methods:{
+                numshow(){
+                    console.log(this.num)
+                },
+                numadd(){
+                    this.num++
+                    let $word='添加后的值为'+this.num
+                    this.$emit('added',$word)
+                },
+                listenopen(){
+                    this.$on('added',function(val){
+                        console.log('added获取的val',val)
+                    })
+                },
+                listenclose(){
+                    this.$off('added')
+                }
+            }
+        })
+    </script>
+    <!--单纯用逻辑来限制组件来调用自身-->
+    <div id="vm3">
+        <my-word></my-word>
+    </div>
+    <script>
+        Vue.component('my-word',{
+            props:{
+                count:{
+                    type:Number,
+                    default:1
+                },
+                countMax:{
+                    type:Number,
+                    default:6
+                }
+            },
+            template:`
+                <div>
+                    <p>count为{{count}}</p>
+                    <my-word :count="count+1" v-if="count<countMax"></my-word>
+                </div>
+                `
+        })
+        var vm3 = new Vue({
+            el:'#vm3'
+        })
+        //默认输出1-6,那么逻辑就是先判断v-if里的count值，再去修改的节奏
+    </script>
+    <!--inline-template会修改内部组件的内容，没事不要随便使用-->
+    <!--x-templte能够将组件中template的样式放到外部定义使用，注意使用时要先定义再使用，不然会报错,如果不用编译工具是决绝字符串模板兼容的一个写法？-->
+    <div id="vm4">
+        <my-template></my-template>
+    </div>
+    <script type="text/x-template" id="my-template">
+        <div>
+            <p>count:{{count}}</p>
+            <button @click="countAdd()">count++</button>
+        </div>
+    </script>
+    <script>
+        Vue.component('my-template',{
+            data:function(){
+                return {
+                    count : 0
+                }
+            },
+            // //默认写法
+            // template:`
+            //     <div>
+            //         <p>count:{{count}}</p>
+            //         <button @click="countAdd()">count++</button>
+            //     </div>
+            // `,
+
+            // 引用x-template
+            template:'#my-template',
+            methods:{
+                countAdd(){
+                    this.count++
+                }
+            }
+        })
+        var vm4 = new Vue({
+            el:'#vm4'
+        })
+    </script>
+    <!--强制渲染-->
+    <div id="vm5">
+        <div v-for="item in mydata" v-key="item.index">
+            {{item.word}}
+        </div>
+    </div>
+    <script>
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                mydata:[
+                    {index:1,word:'index1'},
+                    {index:2,word:'index2'},
+                    {index:3,word:'index3'}
+                ]
+            }
+        })
+        //vm5.mydata.push({index:4,word:'index4'})  修改数据就实现dom变化
+        //vm.$forceUpdate() 仅仅影响本身和插槽
+    </script>
+    <!--用v-once来进行模板缓存，较少组件资源消耗-->
+    <div id="vm6">
+        <my-vonce></my-vonce>
+    </div>
+    <script>
+        Vue.component('my-vonce',{
+            template:`
+                <div v-once>
+                    <p>里面可以放一些重复的背景图，文字啥的，较少反复计算加载</p>
+                </div>
+            `
+        })
+        var vm6 = new Vue({
+            el:'#vm6'
+        })
+    </script>
+    <!--尝试下外部获取数据-->
+    <div id="vm7">
+        <div v-for="item in mydata" v-key="item.index">
+            {{item.word}}
+        </div>
+    </div>
+    <script>
+        var senddata=[
+            {index:1,word:'word1'},
+            {index:2,word:'word2'},
+            {index:3,word:'word3'}
+        ]
+        var vm7 = new Vue({
+            el:'#vm7',
+            data:{
+                mydata:senddata
+            }
+        })
+        //senddata.push({index:4,word:'word4'}),视图也会变化，vue会监听数据层
+    </script>
+</body>
+</html>

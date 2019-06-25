@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vm1">
+        <button @click="myclick">点击在命令行查看输出</button>
+    </div>
+    <script>
+        //变量声明插件
+        var MyPlugin = {};
+        //插件赋予属性
+        MyPlugin.install = function (Vue, options) {
+            // 1. 添加全局方法或属性
+            Vue.myGlobalMethod = function () {
+                // 逻辑...
+                console.log('这里提供全局对象的方法')
+            }
+
+            // 2. 添加全局资源
+            Vue.directive('my-directive', {
+                bind (el, binding, vnode, oldVnode) {
+                    // 逻辑...
+                    console.log('这里用来绑定自定义口令')
+                }
+                //...
+            })
+
+            // 3. 注入组件选项
+            Vue.mixin({
+                created: function () {
+                    // 逻辑...
+                    console.log('这里用来混入外部的对象详细')
+                }
+                    //...
+            })
+
+            // 4. 添加实例方法
+            Vue.prototype.$myMethod = function (methodOptions) {
+                // 逻辑...
+                console.log('这里用来写原型链的继承方法')
+            }
+        }
+        //调用插件
+        Vue.use(MyPlugin);
+        //实例化绑定
+        var vm1 = new Vue({
+            el:'#vm1',
+            data:{
+
+            },
+            methods:{
+                myclick(){
+                    //调用插件方法
+                    this.$myMethod()
+                }
+            }
+        })
+    </script>
+    <p>所谓的插件就是封装好的方法与内容，通过调用插件插件能够获取必要的信息。</p>
+</body>
+</html>

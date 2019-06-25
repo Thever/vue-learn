@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.bootcss.com/vue/2.4.0/vue.js"></script>
+    <!--<script src="vue.js"></script>-->
+</head>
+<body>
+    <div id="vm1">
+        <test-part :mydate="'ko no dio da!'"></test-part>
+        <p>make a try</p>
+    </div>
+    <script>
+        Vue.component('test-part',{
+            template:`
+                <div class="testClass">
+                    <template slot-scope="{myword}">
+                        {{myword}}
+                    </template>
+                </div>
+            `
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+</body>
+</html>

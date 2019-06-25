@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vm1">
+        <bro></bro>
+        <bro></bro>
+        <p>实例化vue才能调用声明的组件</p>
+    </div>
+    <script>
+        //声明组件
+        Vue.component('bro',{
+            //注意结构形式，vue component组件的data必须是函数，为了避免数据共用
+            data: function () {
+                return {
+                    count: 0
+                }
+            },
+            methods:{
+                countAdd(){
+                    this.count++
+                }
+            },
+            template:'<button @click="countAdd()">你点击了我{{count}}次</button>'
+        })
+
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+    <!--用props向组件传值-->
+    <div id="vm2">
+        <dio title='jojo' alt="a"></dio>
+        <dio title='ko no dio da' alt="a"></dio>
+        <dio title='我不做人啦' alt="a"></dio>
+    </div>
+    <script>
+        //用getTitle自定义组件名不行，似乎是保留的关键字啊。。
+        Vue.component('dio',{
+            props:['title','alt'],
+            template:'<h3>said:{{title}},alt:{{alt}}</h3>'
+        })
+        var vm2 = new Vue({
+            el:'#vm2',
+            data:{
+
+            }
+        })
+    </script>
+    <!--插件与数据结合使用-->
+    <!--其实就是通过重新绑定值来实现-->
+    <div id="vm3">
+        <jojo v-for="jojo in jojos" :title="jojo.name" :alt="jojo.work"></jojo>
+    </div>
+    <script>
+        Vue.component('jojo',{
+            props:['title','alt'],
+            template:'<h4>{{title}}+{{alt}}</h4>'
+        })
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                jojos:[
+                    {name:'白金之星',work:'时停+近战'},
+                    {name:'魔术师之红',work:'操纵火焰+近战'},
+                    {name:'银色战车',work:'近战swordman'}
+                ]
+            }
+        })
+    </script>
+    <!--自定义组件需要是一个整体元素结构（根元素）,关键酶不把元素包含在对象里数量很多，那么标签的自带属性就会不够用了-->
+    <div id="vm4">
+        <myjojo v-for="jojo in jojos" :key="jojo.name" :title="jojo.name" :alt="jojo.work"></myjojo>
+        <p>一个个绑定组件的内容太过于麻烦了</p>
+    </div>
+    <script>
+        Vue.component('myjojo',{
+            props:['title','alt'],
+            template:'<h4 style="color:blue;">{{title}}+{{alt}}</h4>'
+        })
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                jojos:[
+                    {name:'dio',work:'时停+近战'},
+                    {name:'ka Q yin',work:'远程+输出+变形'},
+                    {name:'二乔',work:'感知探测+波纹电击'}
+                ]
+            }
+        })
+    </script>
+    <!--用传入对象的方式来创造组件，然后绑定对象即可，更高效，数量管够,记得传入对应的属性名-->
+    <div id="vm5">
+        <!--v-bind:post='show'是灵魂,将循环出的每个对象绑定到了组件的post结构中-->
+        <day-gone v-for="show in shows" v-key="show.index" :post="show">
+        </day-gone>
+        <p>组件高效重构的秘诀就是将数据结构绑定到组件声明的变量上，实现自动继承</p>
+    </div>
+    <script>
+        Vue.component('day-gone',{
+            props:['post'],
+            template:'<h3 style="color:green">{{post.time}}+{{post.place}}+{{post.doing}}</h3>'
+        })
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                shows:[
+                    {index:1,time:'1月1日',place:'家里',doing:'上网'},
+                    {index:2,time:'1月2日',place:'甬江大道',doing:'跑步'},
+                    {index:3,time:'1月3日',place:'宁大北区二村',doing:'逛街'}
+                ]
+            }
+        })
+    </script>
+    <!--组件与实例对象的互动-->
+    <div id="vm6">
+        <div :style="{'font-size':this.font.size+'em'}">
+            <daygone v-for="show in shows" v-key="show.index" :post="show"></daygone>
+        </div>
+        <button @click="adjustFont(1)">点我增大字体</button>
+        <button @click="adjustFont(-1)">点我缩小字体</button>
+    </div>
+    <script>
+        Vue.component('daygone',{
+            props:['post'],
+            template:'<span style="color:red">{{post.time}}+{{post.place}}+{{post.doing}}</span>'
+        })
+        var vm6 = new Vue({
+            el:'#vm6',
+            data:{
+                shows:[
+                    {index:1,time:'1月1日',place:'家里',doing:'上网'},
+                    {index:2,time:'1月2日',place:'甬江大道',doing:'跑步'},
+                    {index:3,time:'1月3日',place:'宁大北区二村',doing:'逛街'}
+                ],
+                font:{
+                    size:1
+                }
+            },
+            methods:{
+                adjustFont(count){
+                    this.font.size+=count
+                    console.log(this.font.size)
+                }
+            }
+        })
+    </script>
+    <!--Vue组件template中使用模板语法-->
+    <div id="vm7" :style="{'font-size':this.font.size+'em'}">
+        <my-block v-for="jojo in jojos" :post="jojo" v-key="jojo.index"></my-block>
+        <button @click="adjustFont(1)">点我增大字体</button>
+        <button @click="adjustFont(-1)">点我缩小字体</button>
+    </div>
+    <script>
+        Vue.component('my-block',{
+            props:['post'],
+            template:`
+               <p style="color:#d8d8d8;">{{post.name}}+{{post.word}}</>
+            `
+        })
+        var vm7 = new Vue({
+            el:'#vm7',
+            data:{
+                jojos:[
+                    {index:1,name:'dio',word:'ko no dio da!'},
+                    {index:2,name:'二乔',word:'让你见识下战斗经验的差距！'}
+                ],
+                font:{
+                    size:1
+                }
+            },
+            methods:{
+                adjustFont(count){
+                    this.font.size+=count
+                    console.log(this.font.size)
+                }
+            }
+        })
+    </script>
+    <!--官方实例Vue组件绑定外部方法-->
+    <div id="vm8">
+        <div :style="{ fontSize: postFontSize + 'em' }">
+            <blog-post
+                    v-for="post in posts"
+                    v-bind:key="post.id"
+                    v-bind:post="post"
+                    v-on:my-big="adjustFont(1)"
+                    v-on:my-small="adjustFont(-1)"
+            ></blog-post>
+            <!--<button @click="adjustFont(1)">点我增大字体</button>-->
+            <!--<button @click="adjustFont(-1)">点我缩小字体</button>-->
+        </div>
+    </div>
+    <script>
+        Vue.component('blog-post', {
+            props: ['post'],
+            template: `
+                <div class="blog-post">
+                  <h3>{{ post.title }}</h3>
+                  <div v-html="post.content"></div>
+                  <button v-on:click="$emit('my-big')">点我增大字体</button>
+                  <button v-on:click="$emit('my-small')">点我缩小字体</button>
+                </div>
+              `
+        })
+        var vm8=new Vue({
+            el: '#vm8',
+            data: {
+                posts: [
+                    {id:1,title:'知乎上线6.0版本，并推出新产品“众裁”',content:'知乎App 6.0正式上线，新版本在iOS、Android端同步上线，变化主要包括两个层面。外观界面上，呈现为信息架构调整优化，目的是更加清晰地对功能和场景进行整合，进一步提升用户体验；内涵生态上，则推出了新产品“众裁”，邀请用户一起参与社区争议解决，共同推进社区规范的演进，在社区规模不断扩大的同时，强化社区共识。众裁”即众人裁判，其初衷就是进一步深化这一理念，让用户更多参与到社区管理中，共同维护社区氛围。未来，一些争议性问题，会由多位众裁官共同判定是否违规，被判违规的内容会基于规范被自动处置。知乎团队也会基于参与和投票情况，推进社区规范的演进。'},
+                    {id:2,title:'传网易云音乐将与虾米合并，阿里：不会放弃音乐赛道',content:'有文章称，网易云音乐与虾米音乐合并在即，虾米方面表示，对传言不予置评，并称，阿里大文娱不会放弃音乐赛道。此外，网易云音乐回应36氪称，系不实传闻。此前有报道称，在腾讯音乐娱乐集团上市后，虾米音乐与网易云音乐的合并事宜被二度摆上谈判桌。音乐投资圈人士表示，价位可能在几千万人民币级别，“谈了两轮，具体有待推进。”'},
+                    {id:3,title:'华为鼓励安卓开发者在其应用商店上架App',content:'华为正在鼓励安卓应用开发者在自家应用商店上架App，从而将自家应用市场作为Google Play Store的替代品。华为在发给安卓开发者的邮件中指出，华为在过去两年中推出的3.5亿部手机上都有自己的应用商店（其中一半是在供向海外市场的），App Gallery（华为应用商店）每月有2.7亿活跃用户。'}
+                ],
+                postFontSize: 1
+            },
+            methods:{
+                adjustFont(count){
+                    this.postFontSize+=count
+                }
+            }
+        })
+
+        //注意点：
+        // 1.$emit用来指明要调用的方法名称
+        // 2.实例化时用v-on来绑定事件联动，不是v-bind属性绑定。
+    </script>
+    <!--获取组件抛出的值-->
+    <div id="vm9">
+        <div :style="{ fontSize: postFontSize + 'em' }">
+            <blog-post
+                    v-for="post in posts"
+                    v-bind:key="post.id"
+                    v-bind:post="post"
+                    v-on:my-big="adjustFont($event)"
+                    v-on:my-small="adjustFont($event)"
+            ></blog-post>
+            <!--<button @click="adjustFont(1)">点我增大字体</button>-->
+            <!--<button @click="adjustFont(-1)">点我缩小字体</button>-->
+        </div>
+    </div>
+    <script>
+        Vue.component('blog-post', {
+            props: ['post'],
+            template: `
+                <div class="blog-post" style="color:blue;">
+                  <h3>{{ post.title }}</h3>
+                  <div v-html="post.content"></div>
+                  <button v-on:click="$emit('my-big',0.1)">点我增大字体</button>
+                  <button v-on:click="$emit('my-small',-0.1)">点我缩小字体</button>
+                </div>
+              `
+        })
+        var vm9=new Vue({
+            el: '#vm9',
+            data: {
+                posts: [
+                    {id:1,title:'知乎上线6.0版本，并推出新产品“众裁”',content:'知乎App 6.0正式上线，新版本在iOS、Android端同步上线，变化主要包括两个层面。外观界面上，呈现为信息架构调整优化，目的是更加清晰地对功能和场景进行整合，进一步提升用户体验；内涵生态上，则推出了新产品“众裁”，邀请用户一起参与社区争议解决，共同推进社区规范的演进，在社区规模不断扩大的同时，强化社区共识。众裁”即众人裁判，其初衷就是进一步深化这一理念，让用户更多参与到社区管理中，共同维护社区氛围。未来，一些争议性问题，会由多位众裁官共同判定是否违规，被判违规的内容会基于规范被自动处置。知乎团队也会基于参与和投票情况，推进社区规范的演进。'},
+                    {id:2,title:'传网易云音乐将与虾米合并，阿里：不会放弃音乐赛道',content:'有文章称，网易云音乐与虾米音乐合并在即，虾米方面表示，对传言不予置评，并称，阿里大文娱不会放弃音乐赛道。此外，网易云音乐回应36氪称，系不实传闻。此前有报道称，在腾讯音乐娱乐集团上市后，虾米音乐与网易云音乐的合并事宜被二度摆上谈判桌。音乐投资圈人士表示，价位可能在几千万人民币级别，“谈了两轮，具体有待推进。”'},
+                    {id:3,title:'华为鼓励安卓开发者在其应用商店上架App',content:'华为正在鼓励安卓应用开发者在自家应用商店上架App，从而将自家应用市场作为Google Play Store的替代品。华为在发给安卓开发者的邮件中指出，华为在过去两年中推出的3.5亿部手机上都有自己的应用商店（其中一半是在供向海外市场的），App Gallery（华为应用商店）每月有2.7亿活跃用户。'}
+                ],
+                postFontSize: 1
+            },
+            methods:{
+                adjustFont(count){
+                    console.log('获取的参数为'+count)
+                    this.postFontSize+=count
+                }
+            }
+        })
+    </script>
+    <!--v-model在组件中的使用，value===model,不考虑多选-->
+    <div id="vm10">
+        <my-input v-model="jojo"></my-input>
+        <p>{{jojo}}</p>
+    </div>
+    <script>
+        Vue.component('my-input',{
+            props:['value'],
+            template:`
+                <input
+                  v-bind:value="value"
+                  v-on:input="$emit('input', $event.target.value)"
+                >
+            `
+        })
+        var vm10 = new Vue({
+            el:'#vm10',
+            data:{
+                jojo:'ko no dio da!'
+            }
+        })
+    </script>
+    <!--<slot>插槽分发内容-->
+    <style>
+        .myalert{
+            padding: 10px 20px;
+            background: #f3beb8;
+            border: 1px solid #f09898;
+            font-size:12px;
+        }
+    </style>
+    <div id="vm11">
+        <my-alert>
+            {{words}}
+        </my-alert>
+        <input type="text" v-model="words">
+    </div>
+    <script>
+        Vue.component('my-alert',{
+            template:`
+                <div class="myalert">
+                    <b>输入的内容为：</b>
+                    <slot></slot>
+                </div>
+            `
+        })
+        var vm11 = new Vue({
+            el:'#vm11',
+            data:{
+                words:'jojo, ko no dio da!'
+            }
+        })
+    </script>
+    <!--动态组件-->
+    <div id="vm12">
+        <p>当前选中的模块：{{chosePart}}</p>
+        <button @click="changePart('word1')">word1</button>
+        <button @click="changePart('word2')">word2</button>
+        <button @click="changePart('word3')">word3</button>
+        <keep-alive>
+            <component v-bind:is="chosePart"></component>
+        </keep-alive>
+    </div>
+    <script>
+        /*先定义要用的组件，在到keep-alive标签里使用*/
+        Vue.component('word1',{
+            template:'<p style="color:red;">word1</p>'
+        })
+        Vue.component('word2',{
+            template:'<p style="color:green;">word2</p>'
+        })
+        Vue.component('word3',{
+            template:'<p style="color:blue;">word3</p>'
+        })
+        /*实例化*/
+        var vm12 = new Vue({
+            el:'#vm12',
+            data:{
+                chosePart:'word1'
+            },
+            methods:{
+                changePart(name){
+                    this.chosePart=name
+                }
+            }
+        })
+        /*keep-alive component v-bind:is用来绑定激活的组件名称，组件会放到缓存中等待调用*/
+    </script>
+</body>
+</html>

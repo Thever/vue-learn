@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!--<script src="vue.js"></script>-->
+</head>
+<body>
+    <p>template比较简洁明了，但是有判断时需要穷举</p>
+    <p>渲染函数返回的结构比较简单，但是层级嵌套会比较麻烦</p>
+    <div id="vm1">
+        <!--这里的level参数用来判断采用哪个样式-->
+        <anchored-heading :level="1">level 1</anchored-heading>
+        <anchored-heading :level="2">level 2</anchored-heading>
+        <anchored-heading :level="3">level 3</anchored-heading>
+        <anchored-heading :level="4">level 4</anchored-heading>
+        <anchored-heading :level="5">level 5</anchored-heading>
+        <anchored-heading :level="6">level 6</anchored-heading>
+        <br>
+        <anchored-heading :level="6">hello,vue</anchored-heading>
+        <!--然而并没有h7标签-->
+    </div>
+    <script type="text/x-template" id="anchored-heading-template">
+        <h1 v-if="level === 1">
+            <slot></slot>
+        </h1>
+        <h2 v-else-if="level === 2">
+            <slot></slot>
+        </h2>
+        <h3 v-else-if="level === 3">
+            <slot></slot>
+        </h3>
+        <h4 v-else-if="level === 4">
+            <slot></slot>
+        </h4>
+        <h5 v-else-if="level === 5">
+            <slot></slot>
+        </h5>
+        <h6 v-else-if="level === 6">
+            <slot></slot>
+        </h6>
+    </script>
+    <script>
+        //模板递归纯手写
+        // Vue.component('anchored-heading', {
+        //     template: '#anchored-heading-template',
+        //     props: {
+        //         level: {
+        //             type: Number,
+        //             required: true
+        //         }
+        //     }
+        // })
+        //x-template作判断处理比较繁琐，需要考虑所有的情况比较繁琐
+        //用render函数动态创建返回内容
+        Vue.component('anchored-heading', {
+            render: function (createElement) {
+                //传入的createElement表示使用的实例本身，然后你就可以去里面拿需要的值
+                return createElement(
+                    'h' + this.level,   // 标签名称
+                    this.$slots.default // 子节点数组
+                )
+            },
+            props: {
+                level: {
+                    type: Number,
+                    required: true
+                }
+            }
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+    <p>虚拟DOM,也就是Vnode</p>
+    <p>练习下createElement的2种形式</p>
+    <div id="vm3">
+        <my-block1>jojo,是我dio哒！</my-block1>
+        <my-block2>ko no dio da!</my-block2>
+    </div>
+    <script>
+        var mybtn={
+            template:`
+                <button style="color:#fff;background-color:#000"><slot></slot></button>
+            `
+        }
+        Vue.component('my-block1',{
+            render: function (createElement) {
+                //传入的createElement表示使用的实例本身，然后你就可以去里面拿需要的值
+                return createElement(
+                    //结构1：标签+内容
+                    'b',   // 标签名称
+                    this.$slots.default // 标签内容
+                )
+            },
+        })
+        Vue.component('my-block2',{
+            render: function (createElement) {
+                //传入的createElement表示使用的实例本身，然后你就可以去里面拿需要的值
+                return createElement(
+                    //结构2：从变量引入样式结构
+                    mybtn,   // 标签名称
+                    this.$slots.default // 标签内容
+                )
+            },
+        })
+        var vm3 = new Vue({
+            el:'#vm3'
+        })
+    </script>
+    <p>官方修改过的插件方法</p>
+    <div id="vm4">
+        <anchored-heading2>jojo!</anchored-heading2>
+    </div>
+    <script>
+        var getChildrenTextContent = function (children) {
+            return children.map(function (node) {
+                return node.children
+                    ? getChildrenTextContent(node.children)
+                    : node.text
+            }).join('')
+        }
+
+        Vue.component('anchored-heading2', {
+            render: function (createElement) {
+                // 创建 kebab-case 风格的 ID
+                var headingId = getChildrenTextContent(this.$slots.default)
+                    .toLowerCase()
+                    .replace(/\W+/g, '-')
+                    .replace(/(^-|-$)/g, '')
+
+                return createElement(
+                    'h' + this.level,
+                    [
+                        createElement('a', {
+                            attrs: {
+                                name: headingId,
+                                href: '#' + headingId
+                            }
+                        }, this.$slots.default)
+                    ]
+                )
+            },
+            props: {
+                level: {
+                    type: Number,
+                    required: true
+                }
+            }
+        })
+        var vm4 = new Vue({
+            el:'#vm4'
+        })
+    </script>
+    <p>vNode必须唯一，多次循环会产生逻辑混乱，官方提供了一个多次渲染的工厂模式方式</p>
+    <script>
+        // render: function (createElement) {
+        //     return createElement('div',
+        //         Array.apply(null, { length: 20 }).map(function () {
+        //             return createElement('p', 'hi')
+        //         })
+        //     )
+        // }
+    </script>
+    <br>
+    <p>用js替代模板</p>
+    <p>js替代v-for</p>
+    <div id="vm5">
+        <ul v-if="items.length">
+            <li v-for="item in items">{{ item.name }}</li>
+        </ul>
+        <p v-else>No items found.</p>
+        <p>------------我是分割线--------------</p>
+        <my-ul :items="items"></my-ul>
+    </div>
+    <script>
+        //创建组件用JS输出样式替代模板
+        Vue.component('my-ul',{
+            props: ['items'],
+            render: function (createElement) {
+                if (this.items.length) {
+                    return createElement('ul', this.items.map(function (item) {
+                        return createElement('li', item.name)
+                    }))
+                } else {
+                    return createElement('p', 'No items found.')
+                }
+            }
+        })
+        var vm5 = new Vue({
+            el:'#vm5',
+            data:{
+                items:[
+                    {index:1,name:1},
+                    {index:2,name:2},
+                    {index:3,name:3}
+                ]
+            }
+        })
+    </script>
+    <br>
+    <p>js替代v-model</p>
+    <div id="vm6">
+        <input type="text" v-model="word">
+        <!--v-model绑定组件，自定义事件似乎不能乱写呢，要写对应的系统事件才能正确监听触发-->
+        <my-input :word="word" v-on:input="word=$event"></my-input>
+        <my-input2 :value="word" v-on:input="word=$event"></my-input2>
+    </div>
+    <script>
+        //模板输出
+        Vue.component('my-input',{
+            props:['word'],
+            template:`
+                <input :value='word' v-on:input="sendValue()"/>
+            `,
+            methods:{
+                sendValue(){
+                    //console.log('event.target.value',event.target.value)
+                    this.$emit('input',event.target.value)
+                }
+            }
+        })
+        //用render函数来输出
+        Vue.component('my-input2',{
+            props: ['value'],
+            render: function (createElement) {
+                var self = this
+                return createElement('input', {
+                    domProps: {
+                        value: self.value
+                    },
+                    on: {
+                        input: function (event) {
+                            self.$emit('input', event.target.value)
+                        }
+                    }
+                })
+            }
+        })
+        var vm6 = new Vue({
+            el:'#vm6',
+            data:{
+                word:'abc'
+            }
+        })
+    </script>
+    <p>render渲染时用on监听事件</p>
+    <div id="vm7">
+        <!--<title-bar v-model.value="title" @keyup="onChange"></title-bar>-->
+    </div>
+    <script>
+        Vue.component('title-bar',{
+            props:['value'],
+            // template:`
+            //     <input :value="title" v-on:input="onChange">
+            // `,
+
+            render:function(createElement){
+                var self = this;
+                return createElement('input',{
+                    domProps:{
+                        value:self.value
+                    },
+                    on:{
+                        input:function(event){
+                            self.$emit('input',event.target.value)
+                        },
+                        keyup:function(event){
+                            // console.log("keyup-->",event);
+                            self.$emit('keyup',event);
+                        }
+                    }
+                })
+            },
+            methods:{
+                onChange(event){
+                    const value = event.target.value;
+                    console.log("event",value);
+                    // this.$emit('input',value)
+
+                }
+            }
+        })
+        var vm7 = new Vue({
+            el: '#vm7',
+            data: {
+                title:"ABC",
+                items:[
+                    {name:'Jim'},
+                    {name:'Anny'},
+                    {name:'John'},
+                ]
+            },
+            methods:{
+                showKeyUp(event){
+                    console.log("Vue Instance ->showKeyUp-->event:",event);
+                }
+            }
+
+        })
+    </script>
+    <p>render的插槽</p>
+    <div id="vm8">
+        <msg-box>传入内容</msg-box>
+    </div>
+    <script>
+        Vue.component('msg-box',{
+            // render:function(createElement){
+            //     var me = this;
+            //     return createElement('div',{
+            //         attrs:{
+            //             style:'color:blue;border:solid 1px blue;padding:10px 5px;border-radius:5px;'
+            //         }
+            //     },me.$slots.default)
+            // },
+            template:`
+                <div style='color:blue;border:solid 1px blue;padding:10px 5px;border-radius:5px;'>
+                     <slot></slot>
+                </div>
+            `
+
+        })
+        var vm8 = new Vue({
+            el:'#vm8'
+        })
+    </script>
+</body>
+</html>

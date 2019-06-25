@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="vm1">
+        <my-part my-title="你好"></my-part>
+        <p>注意下组件中prop声明的myTitle小驼峰的赋值变成了间隔赋值my-title并且成功</p>
+    </div>
+    <script>
+        Vue.component('my-part',{
+            props:['myTitle'],
+            template:'<h3>{{myTitle}}</h3>'
+        })
+        var vm1 = new Vue({
+            el:'#vm1'
+        })
+    </script>
+    <!--prop指定属性传入的类型-->
+    <div id="vm2">
+        <part-a name="dio" is-dead=true age=200 standAbility=['时停','时停中移动'] players={name:'jojo'} callback=function(){console.log('done')}></part-a>
+        <p>查看代码结构，确定prop中声明的传入类型</p>
+        <br>
+        <part-a :name="'dio'" :is-dead='true' :age='200' standAbility="['时停','时停中移动']" players="{name:'jojo'}" :callback="function(){console.log('done')}"></part-a>
+        <p>v-bind绑定的属性后面引号中相当于js的作用域，注意书写的结构，两种直接赋值的方式都比较繁琐，如果让插件和实例高效赋值，用前面的结构赋值会更高效</p>
+    </div>
+    <script>
+        Vue.component('part-a',{
+            props:{
+                name:String,
+                isDead:Boolean,
+                age:Number,
+                standAbility:Array,
+                players:Object,
+                callback:Function,
+                contactsPromise:Promise
+            },
+            template:'<h3>{{name}},是否死亡{{isDead}},年龄{{age}},替0、身能力为{{standAbility}},选择玩家{{players}},操作回调{{callback}},查看监听状态{{contactsPromise}}</h3>'
+        })
+        var vm2 = new Vue({
+            el:'#vm2'
+        })
+    </script>
+    <br>
+    <p>组件prop用的是单向数据流，父级组件通过prop向子类组件传入值，子类组件值不会逆流给父级组件</p>
+    <p>1.向组件绑定值</p>
+    <div id="vm3">
+        <my-counter :counter="counter"></my-counter>
+        <button @click="addCount()">点我试试</button>
+    </div>
+    <script>
+        Vue.component('my-counter',{
+            props:{
+                counter:Number
+            },
+            data:function(){
+                return this.counter
+            },
+            template:'<h3>当前点击了{{counter}}次</h3>'
+        })
+        var vm3 = new Vue({
+            el:'#vm3',
+            data:{
+                counter:0
+            },
+            methods:{
+                addCount(){
+                    this.counter++
+                }
+            }
+        })
+    </script>
+    <p>2.用compited对输出的结果进行控制</p>
+    <div id="vm4">
+        <input type="text" v-model="myVal">
+        <my-change :word="myVal"></my-change>
+    </div>
+    <script>
+        Vue.component('my-change',{
+            props:['word'],
+            computed:{
+                //原本用wordAfter会报错，没事属性命名都用小写吧
+                wordafter(){
+                    return this.word.trim().toLowerCase()
+                }
+            },
+            template:'<h3>去首尾空格小写字母的内容为：<span style="color:blue;">{{wordafter}}</span></h3>'
+        })
+        var vm4 = new Vue({
+            el:'#vm4',
+            data:{
+                myVal:'  ABC '
+            }
+        })
+    </script>
+    <p>注意，子插件中如果对父类插件传入的值直接修改可能影响父组件的功能</p>
+    <p>上面两个案例是通过外部绑定传值的方式给内部传值(借助prop)我们尝试写一个完全自主的插件</p>
+    <div id="vm5">
+        <my-all></my-all>
+    </div>
+    <script>
+        Vue.component('my-all',{
+            data:function(){
+                return {counter:0}
+            },
+            //如果不需要外部传入值的话就不要prop的支持，本地直接规定默认值处理即可
+            // props:{
+            //     counter:Number
+            // },
+            template:`
+            <div>
+                <p>按钮点击了:<span style="color:green">{{counter}}次</span></p>
+                <button @click="addCounter">点我</button>
+            </div>
+            `,
+            methods:{
+                addCounter(){
+                    this.counter++
+                }
+            }
+        })
+        var vm5 = new Vue({
+            el:'#vm5'
+        })
+    </script>
+    <br>
+    <p>prop验证(传入参数处理)</p>
+    <div id="vm6">
+        <my-prop name="jojo" like="海豚" base="666"></my-prop>
+    </div>
+    <script>
+        function Use(name='jojo',age=16){
+            this.name=name
+            this.age=age
+        }
+
+        Vue.component('my-prop',{
+            //props默认格式['a','b','c'],如果做了prop验证就需要用花括号
+            props: {
+                // 基础的类型检查 (`null` 和 `undefined` 会通过任何类型验证)
+                //name接受string或number类型，必须提供
+                //type的类型为JS默认的数据类型+Symbol,虽然一般用不到
+                name: {
+                    type: [String, Number],
+                    require: true
+                },
+                //like接受string，默认值为'swimming'
+                like: {
+                    type: String,
+                    default: 'swimming'
+                },
+                //default后也可以接函数，return的效果相当于直接赋值
+                luckNumber: {
+                    type: [Number, String],
+                    default:function () {
+                        return 6
+                    }
+                },
+                //基础类型
+                base: [String, Number, Boolean],
+                more: Use()
+            },
+            template:'<p>姓名{{name}}+爱好{{like}}+幸运数字{{luckNumber}}+随意绑定的值类型为{{base}}</p>'
+        })
+        var vm6 = new Vue({
+            el:'#vm6'
+        })
+    </script>
+    <p>实例化使用组件时，如果三方库需要自定义属性值，将其属性添加到组件上就可使用了。</p>
+    <p>实例化父类组件添加属性时会覆盖子类组件的属性，而对于class和style这两个属性会将信息全部保留，当然生效样式的还是按照CSS的规则来的</p>
+    <br>
+    <p>inheritAttrs避免组件继承父类赋值</p>
+    <div id="vm7">
+        <my-only :name="'dio'" :age="200" :class="'addclass'" :style="{'color':'blue'}"></my-only>
+    </div>
+    <script>
+        Vue.component('my-only',{
+            inheritAttrs: false,
+            data:function(){
+                return {
+                    name:'jojo',
+                    age:16
+                }
+            },
+            template:'<h3>name:{{name}}+age:{{age}}</h3>'
+        })
+        var vm7 = new Vue({
+            el:'#vm7'
+        })
+        //name:jojo+age:16   ,dio爷的信息并没被接受，class和style还是绑定上了
+    </script>
+</body>
+</html>

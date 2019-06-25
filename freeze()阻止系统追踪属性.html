@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="vue.js"></script>
+</head>
+<body>
+    <div id="area">
+        <p>{{word}}</p>
+        <button v-on:cilick="word ='jojo'">尝试</button>
+    </div>
+    <script>
+        var obj = {
+            word:'ko no dio da!'
+        }
+        Object.freeze(obj)
+        var area = new Vue({
+            el:'#area',
+            data:obj
+        })
+    </script>
+</body>
+</html>
